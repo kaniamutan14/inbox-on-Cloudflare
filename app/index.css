@@ -6,6 +6,26 @@ body {
   margin: 0;
 }
 
+@layer base {
+  [data-mode="dark"] {
+    /* Slate (bluish-gray) palette for dark mode */
+    --color-kumo-surface: #020617; /* slate-950 */
+    --color-kumo-recessed: #0f172a; /* slate-900 */
+    --color-kumo-base: #1e293b; /* slate-800 */
+    --color-kumo-tint: #334155; /* slate-700 */
+    --color-kumo-elevated: #0f172a;
+    --color-kumo-overlay: #1e293b;
+    --color-kumo-fill: #334155;
+    --color-kumo-fill-hover: #475569; /* slate-600 */
+    --color-kumo-line: #334155;
+    --color-kumo-ring: #334155;
+    --color-kumo-tip-stroke: #334155;
+    
+    --text-color-kumo-subtle: #94a3b8; /* slate-400 */
+    --text-color-kumo-strong: #cbd5e1; /* slate-300 */
+  }
+}
+
 /* TipTap list styles */
 .ProseMirror ul {
   list-style-type: disc;

@@ -308,7 +308,7 @@ function AgentChatConnected({
 	const { startCompose, pendingAiDraft, setPendingAiDraft } = useUIStore();
 
 	const agent = useAgent({ agent: "EmailAgent", name: mailboxId });
-	const { messages, sendMessage, status, setMessages, stop } =
+	const { messages, sendMessage, status, setMessages, stop, clearHistory } =
 		useAgentChat({ agent });
 	const isStreaming = status === "streaming" || status === "submitted";
 
@@ -372,7 +372,7 @@ function AgentChatConnected({
 								icon={<TrashIcon size={14} />}
 								onClick={() => {
 									if (window.confirm("Clear chat history?")) {
-										setMessages([]);
+										clearHistory();
 									}
 								}}
 								aria-label="Clear chat"

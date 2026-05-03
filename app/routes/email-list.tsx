@@ -239,6 +239,11 @@ export default function EmailListRoute() {
 	};
 
 	const handleRowClick = (email: Email) => {
+		if (selectedEmailId === email.id) {
+			closePanel();
+			return;
+		}
+
 		selectEmail(email.id);
 		if (mailboxId && hasUnread(email)) {
 			if (email.thread_id && email.thread_count && email.thread_count > 1) {
