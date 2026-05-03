@@ -3,7 +3,7 @@
 *Forked from the original Cloudflare project: [cloudflare/agentic-inbox](https://github.com/cloudflare/agentic-inbox)*
 
 <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-  <img src="./hero.png" width="400" alt="Agentic Inbox Light Mode" />
+  <img src="./demo_app.png" width="400" alt="Agentic Inbox Light Mode" />
   <img src="./dark-mode.png" width="400" alt="Agentic Inbox Dark Mode" />
 </div>
 
