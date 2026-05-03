@@ -80,6 +80,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 		<html lang="en">
 			<head>
 				<meta charSet="UTF-8" />
+				<script
+					dangerouslySetInnerHTML={{
+						__html: `(function(){var s=localStorage.getItem('theme');var t=s||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.setAttribute('data-mode',t)})();`,
+					}}
+				/>
 				<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 				<link
 					rel="icon"

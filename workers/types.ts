@@ -5,4 +5,6 @@
 export interface Env extends Cloudflare.Env {
 	POLICY_AUD: string;
 	TEAM_DOMAIN: string;
+	SMTP2GO_API_KEY: string;
+	DEFAULT_MAILBOX: string;
 }

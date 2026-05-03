@@ -14,6 +14,13 @@ export interface ComposeOptions {
 	draftEmail?: Email | null;
 }
 
+export interface PendingAiDraft {
+	emailId: string;
+	sender: string;
+	subject: string;
+	threadId?: string | null;
+}
+
 interface UIState {
 	// Side panel state
 	selectedEmailId: string | null;
@@ -36,6 +43,11 @@ interface UIState {
 	// Agent panel
 	isAgentPanelOpen: boolean;
 	toggleAgentPanel: () => void;
+	openAgentPanel: () => void;
+
+	// AI Draft trigger
+	pendingAiDraft: PendingAiDraft | null;
+	setPendingAiDraft: (draft: PendingAiDraft | null) => void;
 
 	// Legacy dialog support (kept for non-split views)
 	isComposeModalOpen: boolean;
@@ -83,6 +95,10 @@ export const useUIStore = create<UIState>((set, get) => ({
 	toggleSidebar: () => set({ isSidebarOpen: !get().isSidebarOpen }),
 
 	toggleAgentPanel: () => set({ isAgentPanelOpen: !get().isAgentPanelOpen }),
+	openAgentPanel: () => set({ isAgentPanelOpen: true }),
+
+	pendingAiDraft: null,
+	setPendingAiDraft: (draft) => set({ pendingAiDraft: draft }),
 
 	openComposeModal: (options) =>
 		set({

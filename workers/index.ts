@@ -86,9 +86,10 @@ app.use("/api/v1/mailboxes/:mailboxId/*", requireMailbox);
 // -- Config ---------------------------------------------------------
 
 app.get("/api/v1/config", (c) => {
-	const domainsRaw = c.env.DOMAINS || "";
-	const domains = domainsRaw.split(",").map((d) => d.trim()).filter(Boolean);
-	const emailAddresses = c.env.EMAIL_ADDRESSES ?? [];
+	const defaultMailbox = (c.env.DEFAULT_MAILBOX as string) || "";
+	const domain = defaultMailbox.split("@")[1] || "";
+	const domains = domain ? [domain] : [];
+	const emailAddresses = defaultMailbox ? [defaultMailbox] : [];
 	return c.json({ domains, emailAddresses });
 });
 
@@ -102,9 +103,9 @@ app.get("/api/v1/mailboxes", async (c) => {
 app.post("/api/v1/mailboxes", async (c) => {
 	const { name, settings, email: rawEmail } = CreateMailboxBody.parse(await c.req.json());
 	const email = rawEmail.toLowerCase();
-	const allowedAddresses = (c.env.EMAIL_ADDRESSES ?? []) as string[];
-	if (allowedAddresses.length > 0 && !allowedAddresses.map((a) => a.toLowerCase()).includes(email)) {
-		return c.json({ error: "Mailbox creation is restricted to configured EMAIL_ADDRESSES" }, 403);
+	const allowedAddresses = c.env.DEFAULT_MAILBOX ? [c.env.DEFAULT_MAILBOX.toLowerCase()] : [];
+	if (allowedAddresses.length > 0 && !allowedAddresses.includes(email)) {
+		return c.json({ error: "Mailbox creation is restricted to the configured DEFAULT_MAILBOX" }, 403);
 	}
 	const key = `mailboxes/${email}.json`;
 	if (await c.env.BUCKET.head(key)) return c.json({ error: "Mailbox already exists" }, 409);
@@ -151,6 +152,21 @@ app.get("/api/v1/mailboxes/:mailboxId/emails", async (c: AppContext) => {
 	const sortColumn = c.req.query("sortColumn") as any;
 	const sortDirection = c.req.query("sortDirection") as "ASC" | "DESC" | undefined;
 	const stub = c.var.mailboxStub;
+
+	// Lazy 30-day inbox cleanup (runs in background, no latency impact)
+	if (folder === Folders.INBOX) {
+		c.executionCtx.waitUntil((async () => {
+			try {
+				const { deletedCount, attachmentKeys } = await (stub as any).purgeOldInboxEmails();
+				if (deletedCount > 0) {
+					console.log(`Purged ${deletedCount} inbox emails older than 30 days`);
+					await Promise.all(attachmentKeys.map((key: string) => c.env.BUCKET.delete(key)));
+				}
+			} catch (e) {
+				console.error("Inbox purge failed:", (e as Error).message);
+			}
+		})());
+	}
 
 	if (threaded && folder) {
 		const emails = await (stub as any).getThreadedEmails({ folder, page, limit });
@@ -202,7 +218,7 @@ app.post("/api/v1/mailboxes/:mailboxId/emails", async (c: AppContext) => {
 	}, attachmentData);
 
 	c.executionCtx.waitUntil(
-		sendEmail(c.env.EMAIL, {
+		sendEmail(c.env.SMTP2GO_API_KEY, {
 			to, cc, bcc, from, subject, html, text,
 			attachments: attachments?.map((att) => ({ content: att.content, filename: att.filename, type: att.type, disposition: att.disposition || "attachment", contentId: att.contentId })),
 			...(in_reply_to ? { headers: buildThreadingHeaders(in_reply_to, references || []) } : {}),
@@ -351,16 +367,12 @@ async function receiveEmail(event: { raw: ReadableStream; rawSize: number }, env
 
 	if (!parsedEmail.to?.length || !parsedEmail.to[0].address) throw new Error("received email with empty to");
 
-	const allowedAddresses = ((env.EMAIL_ADDRESSES ?? []) as string[]).map((a) => a.toLowerCase());
 	const allRecipients = parsedEmail.to.map((t) => t.address?.toLowerCase()).filter(Boolean) as string[];
 	const ccRecipients = (parsedEmail.cc || []).map((e) => e.address?.toLowerCase()).filter(Boolean) as string[];
 	const bccRecipients = (parsedEmail.bcc || []).map((e) => e.address?.toLowerCase()).filter(Boolean) as string[];
 
-	let mailboxId: string | undefined;
-	if (allowedAddresses.length > 0) {
-		mailboxId = allRecipients.find((addr) => allowedAddresses.includes(addr));
-		if (!mailboxId) { console.log(`Ignoring email: no recipient matches EMAIL_ADDRESSES.`); return; }
-	} else { mailboxId = allRecipients[0]; }
+	// Route all emails to the single catch-all mailbox
+	const mailboxId = ((env.DEFAULT_MAILBOX as string) || allRecipients[0])?.toLowerCase();
 	if (!mailboxId) throw new Error("received email with no valid recipient address");
 
 	const messageId = crypto.randomUUID();
@@ -402,11 +414,7 @@ async function receiveEmail(event: { raw: ReadableStream; rawSize: number }, env
 		thread_id: threadId, message_id: originalMessageId, raw_headers: JSON.stringify(parsedEmail.headers),
 	}, attachmentData);
 
-	const agentStub = env.EMAIL_AGENT.get(env.EMAIL_AGENT.idFromName(mailboxId));
-	ctx.waitUntil(agentStub.fetch(new Request("https://agents/onNewEmail", {
-		method: "POST", headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ mailboxId, emailId: messageId, sender: (parsedEmail.from?.address || "").toLowerCase(), subject: parsedEmail.subject || "", threadId }),
-	})).catch((e) => console.error("Auto-draft trigger failed:", (e as Error).message)));
+	// Auto-draft disabled — AI drafting is now triggered manually from the UI
 }
 
 export { app, receiveEmail };

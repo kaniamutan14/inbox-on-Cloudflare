@@ -44,7 +44,7 @@ export default function EmailPanel({ emailId }: { emailId: string }) {
 	const { data: currentMailbox } = useMailbox(mailboxId) as {
 		data?: Mailbox;
 	};
-	const { closePanel, startCompose } = useUIStore();
+	const { closePanel, startCompose, openAgentPanel, setPendingAiDraft } = useUIStore();
 	const toastManager = useKumoToastManager();
 	const [isSending, setIsSending] = useState(false);
 	const [sourceViewEmail, setSourceViewEmail] = useState<Email | null>(null);
@@ -137,6 +137,17 @@ export default function EmailPanel({ emailId }: { emailId: string }) {
 		} finally { setIsSending(false); }
 	};
 
+	const handleAiDraft = () => {
+		if (!email) return;
+		openAgentPanel();
+		setPendingAiDraft({
+			emailId: email.id,
+			sender: email.sender,
+			subject: email.subject,
+			threadId: email.thread_id,
+		});
+	};
+
 	const hasThread = allMessages.length > 1;
 
 	return (
@@ -173,6 +184,7 @@ export default function EmailPanel({ emailId }: { emailId: string }) {
 				onMove={handleMove}
 				onViewSource={() => setSourceViewEmail(email)}
 				onDelete={handleDelete}
+				onAiDraft={isDraftFolder ? undefined : handleAiDraft}
 			/>
 
 			<EmailPanelHeader

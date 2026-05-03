@@ -15,6 +15,8 @@ export default function ComposePanel() {
 	}>();
 
 	const {
+		from,
+		setFrom,
 		to,
 		setTo,
 		cc,
@@ -64,6 +66,21 @@ export default function ComposePanel() {
 					{error && <Banner variant="error" text={error} />}
 
 					<div className="space-y-3">
+						<div className="flex items-center gap-2">
+							<label className="text-sm font-medium text-kumo-subtle w-14 shrink-0">
+								From
+							</label>
+							<div className="flex-1">
+								<Input
+									type="email"
+									placeholder="sender@yourdomain.com"
+									size="sm"
+									value={from}
+									onChange={(e) => setFrom(e.target.value)}
+									required
+								/>
+							</div>
+						</div>
 						<div className="flex items-center gap-2">
 							<label className="text-sm font-medium text-kumo-subtle w-14 shrink-0">
 								To

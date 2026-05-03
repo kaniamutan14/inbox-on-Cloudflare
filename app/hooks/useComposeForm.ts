@@ -178,6 +178,7 @@ export function useComposeForm(mailboxId?: string, _folder?: string) {
 	const [showCcBcc, setShowCcBcc] = useState(false);
 	const [subject, setSubject] = useState("");
 	const [body, setBody] = useState("");
+	const [from, setFrom] = useState("");
 	const [error, setError] = useState<string | null>(null);
 	const [isSavingDraft, setIsSavingDraft] = useState(false);
 	const [isSending, setIsSending] = useState(false);
@@ -207,6 +208,15 @@ export function useComposeForm(mailboxId?: string, _folder?: string) {
 		setShowCcBcc(initialFields.showCcBcc);
 		setSubject(initialFields.subject);
 		setBody(initialFields.body);
+
+		// Smart "from" address: on reply, use the address the email was sent TO
+		const { mode, originalEmail } = composeOptions;
+		if ((mode === "reply" || mode === "reply-all") && originalEmail?.recipient) {
+			const recipients = originalEmail.recipient.split(",").map((r: string) => r.trim());
+			setFrom(recipients[0] || currentMailbox?.email || "");
+		} else {
+			setFrom(currentMailbox?.email || "");
+		}
 	}, [composeOptions, currentMailbox?.email, sigBlock]);
 
 	const handleSaveDraft = async () => {
@@ -239,12 +249,13 @@ export function useComposeForm(mailboxId?: string, _folder?: string) {
 		if (toRecipients.length === 0) { setError("Add at least one recipient."); return; }
 		const ccRecipients = splitEmailList(cc); const bccRecipients = splitEmailList(bcc);
 		const fromName = currentMailbox.settings?.fromName || currentMailbox.name;
-		const from = fromName && fromName !== currentMailbox.email ? { email: currentMailbox.email, name: fromName } : currentMailbox.email;
+		const fromAddress = from.trim() || currentMailbox.email;
+		const fromValue = fromName && fromName !== fromAddress ? { email: fromAddress, name: fromName } : fromAddress;
 		const emailData = {
 			to: toEmailListValue(toRecipients),
 			cc: toEmailListValue(ccRecipients),
 			bcc: toEmailListValue(bccRecipients),
-			from,
+			from: fromValue,
 			subject,
 			html: body,
 			text: htmlToPlainText(body),
@@ -262,5 +273,5 @@ export function useComposeForm(mailboxId?: string, _folder?: string) {
 		finally { setIsSending(false); }
 	};
 
-	return { to, setTo, cc, setCc, bcc, setBcc, showCcBcc, setShowCcBcc, subject, setSubject, body, setBody, error, setError, isSavingDraft, isSending, formTitle, handleSaveDraft, handleSend, closeCompose, closePanel };
+	return { from, setFrom, to, setTo, cc, setCc, bcc, setBcc, showCcBcc, setShowCcBcc, subject, setSubject, body, setBody, error, setError, isSavingDraft, isSending, formTitle, handleSaveDraft, handleSend, closeCompose, closePanel };
 }

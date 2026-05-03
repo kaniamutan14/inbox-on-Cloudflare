@@ -15,6 +15,7 @@ import {
 	FolderSimpleIcon,
 	PaperPlaneTiltIcon,
 	PencilSimpleIcon,
+	SparkleIcon,
 	StarIcon,
 	TrashIcon,
 	XIcon,
@@ -39,6 +40,7 @@ interface EmailPanelToolbarProps {
 	onMove: (folderId: string) => void;
 	onViewSource: () => void;
 	onDelete: () => void;
+	onAiDraft?: () => void;
 }
 
 export default function EmailPanelToolbar({
@@ -58,6 +60,7 @@ export default function EmailPanelToolbar({
 	onMove,
 	onViewSource,
 	onDelete,
+	onAiDraft,
 }: EmailPanelToolbarProps) {
 	return (
 		<div className="flex items-center gap-1 px-3 py-2 border-b border-kumo-line shrink-0 md:px-4">
@@ -123,6 +126,18 @@ export default function EmailPanelToolbar({
 							aria-label="Forward"
 						/>
 					</Tooltip>
+					{onAiDraft && (
+						<Tooltip content="AI Draft Reply" side="bottom" asChild>
+							<Button
+								variant="ghost"
+								shape="square"
+								size="sm"
+								icon={<SparkleIcon size={18} weight="fill" className="text-kumo-warning" />}
+								onClick={onAiDraft}
+								aria-label="AI Draft Reply"
+							/>
+						</Tooltip>
+					)}
 				</>
 			)}
 

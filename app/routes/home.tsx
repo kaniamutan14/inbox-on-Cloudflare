@@ -15,7 +15,7 @@ import {
 import { EnvelopeIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { type FormEvent, useEffect, useRef, useState } from "react";
-import { Link as RouterLink } from "react-router";
+import { Link as RouterLink, useNavigate } from "react-router";
 import api from "~/services/api";
 import {
 	useCreateMailbox,
@@ -29,10 +29,18 @@ export function meta() {
 }
 
 export default function HomeRoute() {
+	const navigate = useNavigate();
 	const toastManager = useKumoToastManager();
 	const { data: mailboxes = [], refetch: refetchMailboxes, isFetched: mailboxesFetched } = useMailboxes();
 	const createMailbox = useCreateMailbox();
 	const deleteMailbox = useDeleteMailbox();
+
+	// Auto-redirect to the first (catch-all) mailbox inbox
+	useEffect(() => {
+		if (mailboxesFetched && mailboxes.length > 0) {
+			navigate(`/mailbox/${mailboxes[0].id}/emails/inbox`, { replace: true });
+		}
+	}, [mailboxesFetched, mailboxes, navigate]);
 
 	const { data: configData } = useQuery({
 		queryKey: queryKeys.config,

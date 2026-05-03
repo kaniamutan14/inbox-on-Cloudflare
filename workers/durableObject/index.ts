@@ -869,4 +869,50 @@ export class MailboxDO extends DurableObject<Env> {
 			this.db.insert(schema.attachments).values(attachments).run();
 		}
 	}
+
+	/**
+	 * Delete inbox emails older than 30 days.
+	 * Only targets the "inbox" folder — Sent, Draft, Archive, Trash,
+	 * and all custom folders are exempt.
+	 * Returns IDs of deleted emails + their attachment R2 keys for cleanup.
+	 */
+	async purgeOldInboxEmails(): Promise<{ deletedCount: number; attachmentKeys: string[] }> {
+		const oldEmails = [
+			...this.ctx.storage.sql.exec(
+				`SELECT id FROM emails WHERE folder_id = ?1 AND date < datetime('now', '-30 days')`,
+				Folders.INBOX,
+			),
+		] as { id: string }[];
+
+		if (oldEmails.length === 0) return { deletedCount: 0, attachmentKeys: [] };
+
+		const ids = oldEmails.map((e) => e.id);
+		const placeholders = ids.map((_, i) => `?${i + 1}`).join(",");
+
+		// Get attachment info for R2 cleanup
+		const attachments = [
+			...this.ctx.storage.sql.exec(
+				`SELECT id, email_id, filename FROM attachments WHERE email_id IN (${placeholders})`,
+				...ids,
+			),
+		] as { id: string; email_id: string; filename: string }[];
+
+		const attachmentKeys = attachments.map(
+			(a) => `attachments/${a.email_id}/${a.id}/${a.filename}`,
+		);
+
+		// Delete attachments then emails
+		if (attachments.length > 0) {
+			this.ctx.storage.sql.exec(
+				`DELETE FROM attachments WHERE email_id IN (${placeholders})`,
+				...ids,
+			);
+		}
+		this.ctx.storage.sql.exec(
+			`DELETE FROM emails WHERE id IN (${placeholders})`,
+			...ids,
+		);
+
+		return { deletedCount: ids.length, attachmentKeys };
+	}
 }

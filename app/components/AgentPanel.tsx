@@ -305,12 +305,21 @@ function AgentChatConnected({
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLTextAreaElement>(null);
 	const [inputValue, setInputValue] = useState("");
-	const { startCompose } = useUIStore();
+	const { startCompose, pendingAiDraft, setPendingAiDraft } = useUIStore();
 
 	const agent = useAgent({ agent: "EmailAgent", name: mailboxId });
 	const { messages, sendMessage, status, setMessages, stop } =
 		useAgentChat({ agent });
 	const isStreaming = status === "streaming" || status === "submitted";
+
+	// Consume pending AI draft request from toolbar button
+	useEffect(() => {
+		if (pendingAiDraft && !isStreaming) {
+			const prompt = `Draft a reply to email ${pendingAiDraft.emailId} from ${pendingAiDraft.sender}: "${pendingAiDraft.subject}"`;
+			sendMessage({ text: prompt });
+			setPendingAiDraft(null);
+		}
+	}, [pendingAiDraft, isStreaming]);
 
 	useEffect(() => {
 		const el = scrollRef.current;

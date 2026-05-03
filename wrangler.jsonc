@@ -10,18 +10,11 @@
 		"nodejs_compat"
 	],
 	"vars": {
-		// Production deploys must also define POLICY_AUD and TEAM_DOMAIN.
-		// TEAM_DOMAIN may be the base Access URL or the full /cdn-cgi/access/certs URL.
-		// The worker now fails closed outside local development if Access is not configured.
-		"DOMAINS": "example.com",
-		"EMAIL_ADDRESSES": []
+		// The single catch-all mailbox address. All incoming mail routes here.
+		// DOMAINS and EMAIL_ADDRESSES are derived from this at runtime.
+		// SMTP2GO_API_KEY, POLICY_AUD, TEAM_DOMAIN → set as Worker secrets or in Dashboard.
+		"DEFAULT_MAILBOX": "inbox@kaniblog.fyi"
 	},
-	"send_email": [
-		{
-			"name": "EMAIL",
-			"remote": true
-		}
-	],
 	"r2_buckets": [
 		{
 			"binding": "BUCKET",
@@ -30,7 +23,8 @@
 		}
 	],
 	"ai": {
-		"binding": "AI"
+		"binding": "AI",
+		"remote": true
 	},
 	"durable_objects": {
 		"bindings": [

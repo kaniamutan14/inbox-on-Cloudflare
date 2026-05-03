@@ -3,11 +3,11 @@
 //     https://opensource.org/licenses/Apache-2.0
 
 /**
- * Email sending via Cloudflare Email Service binding.
+ * Send emails via the SMTP2GO REST API.
+ * Replaces the original Cloudflare Email Service binding (`env.EMAIL.send()`).
  *
- * Uses the `send_email` Worker binding (`env.EMAIL.send()`) to send emails.
- *
- * See: https://developers.cloudflare.com/email-service/api/send-emails/workers-api/
+ * API docs: https://apidocs.smtp2go.com/
+ * Endpoint: POST https://api.smtp2go.com/v3/email/send
  */
 
 export interface SendEmailParams {
@@ -29,44 +29,60 @@ export interface SendEmailParams {
 	headers?: Record<string, string>;
 }
 
-/**
- * Send an email using the Cloudflare Email Service binding.
- *
- * @param binding  - The `EMAIL` SendEmail binding from env
- * @param params   - Email parameters (to, from, subject, body, etc.)
- * @returns The send result with messageId
- * @throws On validation or delivery errors (error has `.code` property)
- */
 export async function sendEmail(
-	binding: SendEmail,
+	apiKey: string,
 	params: SendEmailParams,
 ): Promise<{ messageId: string }> {
-	const message: Record<string, unknown> = {
-		to: params.to,
-		from: params.from,
+	const senderStr =
+		typeof params.from === "string"
+			? params.from
+			: `${params.from.name} <${params.from.email}>`;
+
+	const toArr = Array.isArray(params.to) ? params.to : [params.to];
+
+	const body: Record<string, unknown> = {
+		api_key: apiKey,
+		sender: senderStr,
+		to: toArr,
 		subject: params.subject,
 	};
 
-	if (params.html) message.html = params.html;
-	if (params.text) message.text = params.text;
-	if (params.cc) message.cc = params.cc;
-	if (params.bcc) message.bcc = params.bcc;
-	if (params.replyTo) message.replyTo = params.replyTo;
+	if (params.html) body.html_body = params.html;
+	if (params.text) body.text_body = params.text;
+	if (params.cc)
+		body.cc = Array.isArray(params.cc) ? params.cc : [params.cc];
+	if (params.bcc)
+		body.bcc = Array.isArray(params.bcc) ? params.bcc : [params.bcc];
 
+	// Custom headers (In-Reply-To, References, etc.)
 	if (params.headers && Object.keys(params.headers).length > 0) {
-		message.headers = params.headers;
+		body.custom_headers = Object.entries(params.headers).map(
+			([header, value]) => ({ header, value }),
+		);
 	}
 
+	// Attachments
 	if (params.attachments && params.attachments.length > 0) {
-		message.attachments = params.attachments.map((att) => ({
-			content: att.content,
+		body.attachments = params.attachments.map((att) => ({
 			filename: att.filename,
-			type: att.type,
-			disposition: att.disposition,
-			...(att.contentId ? { contentId: att.contentId } : {}),
+			fileblob: att.content,
+			mimetype: att.type,
 		}));
 	}
 
-	const result = await binding.send(message as any);
-	return { messageId: result.messageId };
+	const response = await fetch("https://api.smtp2go.com/v3/email/send", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(body),
+	});
+
+	if (!response.ok) {
+		const errBody = await response.text();
+		throw new Error(`SMTP2GO error (${response.status}): ${errBody}`);
+	}
+
+	const result = (await response.json()) as {
+		data?: { email_id?: string };
+	};
+	return { messageId: result.data?.email_id || crypto.randomUUID() };
 }
