@@ -7,4 +7,5 @@ export interface Env extends Omit<Cloudflare.Env, "DEFAULT_MAILBOX"> {
 	TEAM_DOMAIN: string;
 	SMTP2GO_API_KEY: string;
 	DEFAULT_MAILBOX: string;
+	DISCORD_WEBHOOK_URL?: string;
 }

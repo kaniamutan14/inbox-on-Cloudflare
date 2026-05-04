@@ -415,6 +415,57 @@ async function receiveEmail(event: { raw: ReadableStream; rawSize: number }, env
 	}, attachmentData);
 
 	// Auto-draft disabled — AI drafting is now triggered manually from the UI
+
+	// Discord Notification - Safely trigger if configured and within subrequest limits
+	// Cloudflare Free Tier has a 50 subrequest limit. Each attachment = 1, mailbox check = 1.
+	// We only notify if we have room (max 40 attachments) to ensure the save logic is NEVER impacted.
+	if (env.DISCORD_WEBHOOK_URL && attachmentData.length < 40) {
+		const baseUrl = env.TEAM_DOMAIN ? (env.TEAM_DOMAIN.includes("://") ? env.TEAM_DOMAIN : `https://${env.TEAM_DOMAIN}`) : "";
+		ctx.waitUntil(notifyDiscord(env.DISCORD_WEBHOOK_URL, {
+			subject: parsedEmail.subject || "(No Subject)",
+			from: parsedEmail.from?.address || "Unknown Sender",
+			mailboxId,
+			bodyPreview: (parsedEmail.text || parsedEmail.html || "").slice(0, 500),
+			viewUrl: baseUrl ? `${baseUrl.replace(/\/$/, "")}/mailbox/${mailboxId}/email/${messageId}` : undefined,
+		}));
+	}
+}
+
+async function notifyDiscord(url: string, data: {
+	subject: string;
+	from: string;
+	mailboxId: string;
+	bodyPreview: string;
+	viewUrl?: string;
+}) {
+	try {
+		// Discord limits: Title 256 chars, Description 4096. 
+		// We truncate subject to 200 to be safe with the prefix.
+		const safeSubject = data.subject.length > 200 ? data.subject.slice(0, 197) + "..." : data.subject;
+		
+		const res = await fetch(url, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				embeds: [{
+					title: `📧 New Email: ${safeSubject}`,
+					description: data.bodyPreview + (data.bodyPreview.length >= 500 ? "..." : ""),
+					color: 0x5865F2, // Discord Blurple
+					fields: [
+						{ name: "From", value: data.from, inline: true },
+						{ name: "Mailbox", value: data.mailboxId, inline: true },
+					],
+					url: data.viewUrl,
+					timestamp: new Date().toISOString(),
+				}],
+			}),
+		});
+		if (!res.ok) {
+			console.error(`Discord notification failed with status ${res.status}: ${await res.text()}`);
+		}
+	} catch (err) {
+		console.error("Error sending Discord notification:", err);
+	}
 }
 
 export { app, receiveEmail };
