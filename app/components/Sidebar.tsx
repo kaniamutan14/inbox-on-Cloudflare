@@ -17,7 +17,7 @@ import {
 import { useMemo, useState } from "react";
 import { NavLink, useNavigate, useParams } from "react-router";
 import { Folders, SYSTEM_FOLDER_IDS } from "shared/folders";
-import { useCreateFolder, useFolders } from "~/queries/folders";
+import { useCreateFolder, useFolders, useDeleteFolder } from "~/queries/folders";
 import { useMailbox } from "~/queries/mailboxes";
 import { useUIStore } from "~/hooks/useUIStore";
 
@@ -74,10 +74,14 @@ function FolderLink({
 }
 
 export default function Sidebar() {
-	const { mailboxId } = useParams<{ mailboxId: string }>();
+	const { mailboxId, folder: currentFolderId } = useParams<{
+		mailboxId: string;
+		folder: string;
+	}>();
 	const navigate = useNavigate();
 	const { data: folders = [] } = useFolders(mailboxId);
 	const createFolderMutation = useCreateFolder();
+	const deleteFolderMutation = useDeleteFolder();
 	const { startCompose, closeSidebar } = useUIStore();
 	const { data: currentMailbox } = useMailbox(mailboxId);
 	const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
@@ -85,7 +89,9 @@ export default function Sidebar() {
 
 	const customFolders = useMemo(
 		() =>
-			folders.filter((f) => !(SYSTEM_FOLDER_IDS as readonly string[]).includes(f.id)),
+			folders.filter(
+				(f) => !(SYSTEM_FOLDER_IDS as readonly string[]).includes(f.id),
+			),
 		[folders],
 	);
 
@@ -100,6 +106,25 @@ export default function Sidebar() {
 			createFolderMutation.mutate({ mailboxId, name: newFolderName.trim() });
 			setNewFolderName("");
 			setIsCreateFolderOpen(false);
+		}
+	};
+
+	const handleDeleteFolder = (folderId: string, folderName: string) => {
+		if (
+			confirm(
+				`Are you sure you want to delete the folder "${folderName}"? All emails in this folder will be permanently deleted.`,
+			)
+		) {
+			deleteFolderMutation.mutate(
+				{ mailboxId: mailboxId!, id: folderId },
+				{
+					onSuccess: () => {
+						if (currentFolderId === folderId) {
+							navigate(`/mailbox/${mailboxId}/emails/${Folders.INBOX}`);
+						}
+					},
+				},
+			);
 		}
 	};
 
@@ -189,14 +214,31 @@ export default function Sidebar() {
 							</Tooltip>
 						</div>
 						{customFolders.map((folder) => (
-							<FolderLink
-								key={folder.id}
-								to={`/mailbox/${mailboxId}/emails/${folder.id}`}
-								icon={<FolderIcon size={18} />}
-								label={folder.name}
-								unreadCount={folder.unreadCount}
-								onClick={handleNavClick}
-							/>
+							<div key={folder.id} className="group relative">
+								<FolderLink
+									to={`/mailbox/${mailboxId}/emails/${folder.id}`}
+									icon={<FolderIcon size={18} />}
+									label={folder.name}
+									unreadCount={folder.unreadCount}
+									onClick={handleNavClick}
+								/>
+								<div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+									<Tooltip content="Delete folder" asChild>
+										<Button
+											variant="ghost"
+											shape="square"
+											size="xs"
+											icon={<TrashIcon size={14} />}
+											onClick={(e) => {
+												e.preventDefault();
+												e.stopPropagation();
+												handleDeleteFolder(folder.id, folder.name);
+											}}
+											aria-label={`Delete folder ${folder.name}`}
+										/>
+									</Tooltip>
+								</div>
+							</div>
 						))}
 					</div>
 				)}
