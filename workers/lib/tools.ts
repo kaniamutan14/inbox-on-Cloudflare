@@ -25,6 +25,8 @@ import {
 	generateMessageId,
 	buildReferencesChain,
 	buildThreadingHeaders,
+	validateSender,
+	SenderValidationError,
 } from "./email-helpers";
 import { verifyDraft } from "./ai";
 import { sendEmail } from "../email-sender";
@@ -396,6 +398,7 @@ export async function toolSendReply(
 	params: {
 		originalEmailId: string;
 		to: string;
+		from?: string;
 		subject: string;
 		bodyHtml: string;
 	},
@@ -416,9 +419,15 @@ export async function toolSendReply(
 		return { error: "Original email not found" };
 	}
 
+	let toStr: string, fromEmail: string, fromDomain: string;
+	try {
+		({ toStr, fromEmail, fromDomain } = validateSender(params.to, params.from || mailboxId, mailboxId));
+	} catch (e) {
+		if (e instanceof SenderValidationError) return { error: e.message };
+		throw e;
+	}
+
 	const { originalMsgId, references, threadId } = buildReferencesChain(originalEmail);
-	const fromDomain = mailboxId.split("@")[1];
-	if (!fromDomain) throw new Error("Invalid mailbox email address");
 	const { messageId, outgoingMessageId } = generateMessageId(fromDomain);
 
 	// Verify and append quoted original message
@@ -436,7 +445,7 @@ export async function toolSendReply(
 	try {
 		await sendEmail(env.SMTP2GO_API_KEY, {
 			to: params.to,
-			from: mailboxId,
+			from: params.from || mailboxId,
 			subject: params.subject,
 			html: fullBodyHtml,
 			headers: buildThreadingHeaders(originalMsgId, references),
@@ -451,8 +460,8 @@ export async function toolSendReply(
 		{
 			id: messageId,
 			subject: params.subject,
-			sender: mailboxId.toLowerCase(),
-			recipient: params.to.toLowerCase(),
+			sender: fromEmail,
+			recipient: toStr,
 			date: new Date().toISOString(),
 			body: fullBodyHtml,
 			in_reply_to: originalMsgId,
@@ -474,6 +483,7 @@ export async function toolSendEmail(
 	mailboxId: string,
 	params: {
 		to: string;
+		from?: string;
 		subject: string;
 		bodyHtml: string;
 	},
@@ -489,8 +499,14 @@ export async function toolSendEmail(
 		return { error: rateLimitError };
 	}
 
-	const fromDomain = mailboxId.split("@")[1];
-	if (!fromDomain) throw new Error("Invalid mailbox email address");
+	let toStr: string, fromEmail: string, fromDomain: string;
+	try {
+		({ toStr, fromEmail, fromDomain } = validateSender(params.to, params.from || mailboxId, mailboxId));
+	} catch (e) {
+		if (e instanceof SenderValidationError) return { error: e.message };
+		throw e;
+	}
+
 	const { messageId, outgoingMessageId } = generateMessageId(fromDomain);
 
 	const sanitizedBody = await verifyDraft(env.AI, params.bodyHtml);
@@ -501,7 +517,7 @@ export async function toolSendEmail(
 	try {
 		await sendEmail(env.SMTP2GO_API_KEY, {
 			to: params.to,
-			from: mailboxId,
+			from: params.from || mailboxId,
 			subject: params.subject,
 			html: sanitizedBody,
 		});
@@ -515,8 +531,8 @@ export async function toolSendEmail(
 		{
 			id: messageId,
 			subject: params.subject,
-			sender: mailboxId.toLowerCase(),
-			recipient: params.to.toLowerCase(),
+			sender: fromEmail,
+			recipient: toStr,
 			date: new Date().toISOString(),
 			body: sanitizedBody,
 			in_reply_to: null,

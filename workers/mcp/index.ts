@@ -61,7 +61,7 @@ function mcpResult(result: Record<string, unknown>) {
  * `/mcp` endpoint and can list mailboxes, read/search emails,
  * draft replies, send messages, and manage folders.
  */
-export class EmailMCP extends McpAgent<Env> {
+export class EmailMCP extends McpAgent<any> {
 	server = new McpServer({
 		name: "agentic-inbox",
 		version: "1.0.0",
@@ -320,15 +320,17 @@ export class EmailMCP extends McpAgent<Env> {
 					.string()
 					.describe("The ID of the email being replied to"),
 				to: z.string().email().describe("Recipient email address"),
+				from: z.string().optional().describe("Optional custom from address alias (must belong to the same domain as mailboxId)"),
 				subject: z.string().describe("Subject line"),
 				bodyHtml: z.string().describe("The HTML body of the reply"),
 			},
-			async ({ mailboxId, originalEmailId, to, subject, bodyHtml }) => {
+			async ({ mailboxId, originalEmailId, to, from, subject, bodyHtml }) => {
 				const denied = await verifyMailbox(mailboxId);
 				if (denied) return denied;
 				const result = await toolSendReply(env, mailboxId, {
 					originalEmailId,
 					to,
+					from,
 					subject,
 					bodyHtml,
 				});
@@ -359,14 +361,16 @@ export class EmailMCP extends McpAgent<Env> {
 			{
 				mailboxId: z.string().describe("The mailbox email address to send from"),
 				to: z.string().email().describe("Recipient email address"),
+				from: z.string().optional().describe("Optional custom from address alias (must belong to the same domain as mailboxId)"),
 				subject: z.string().describe("Subject line"),
 				bodyHtml: z.string().describe("The HTML body of the email"),
 			},
-			async ({ mailboxId, to, subject, bodyHtml }) => {
+			async ({ mailboxId, to, from, subject, bodyHtml }) => {
 				const denied = await verifyMailbox(mailboxId);
 				if (denied) return denied;
 				const result = await toolSendEmail(env, mailboxId, {
 					to,
+					from,
 					subject,
 					bodyHtml,
 				});
