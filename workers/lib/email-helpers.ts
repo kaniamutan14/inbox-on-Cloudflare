@@ -183,12 +183,17 @@ export function textToHtml(text: string): string {
  */
 export function stripHtmlToText(html: string): string {
 	if (!html) return "";
-	return html
-		.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
-		.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-		.replace(/<[^>]+>/g, " ")
-		.replace(/\s+/g, " ")
-		.trim();
+	let current = html;
+	let last;
+	do {
+		last = current;
+		current = current
+			.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+			.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+			.replace(/<[^>]+>/g, " ");
+	} while (current !== last);
+
+	return current.replace(/\s+/g, " ").trim();
 }
 
 /**

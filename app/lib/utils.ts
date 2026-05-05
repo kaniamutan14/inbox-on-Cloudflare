@@ -61,8 +61,15 @@ export function htmlToPlainText(html: string): string {
 	// while preserving structural HTML for text extraction.
 	const sanitized = DOMPurify.sanitize(html);
 	const div = document.createElement("div");
-	div.innerHTML = sanitized
-		.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+
+	let processed = sanitized;
+	let last;
+	do {
+		last = processed;
+		processed = processed.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "");
+	} while (processed !== last);
+
+	div.innerHTML = processed
 		.replace(/<br\s*\/?>/gi, "\n")
 		.replace(/<\/p>/gi, "\n\n")
 		.replace(/<p[^>]*>/gi, "")
@@ -75,7 +82,13 @@ export function htmlToPlainText(html: string): string {
  * Strip all HTML tags from a string.
  */
 export function stripHtml(html: string): string {
-	return html.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+	let current = html;
+	let last;
+	do {
+		last = current;
+		current = current.replace(/<[^>]*>/g, "");
+	} while (current !== last);
+	return current.replace(/\s+/g, " ").trim();
 }
 
 function decodeHtmlEntities(text: string): string {
@@ -86,13 +99,13 @@ function decodeHtmlEntities(text: string): string {
 		.replace(/&#x([0-9a-f]+);/gi, (_match: string, hex: string) =>
 			String.fromCharCode(Number.parseInt(hex, 16)),
 		)
-		.replace(/&amp;/g, "&")
 		.replace(/&lt;/g, "<")
 		.replace(/&gt;/g, ">")
 		.replace(/&quot;/g, '"')
 		.replace(/&#39;/g, "'")
 		.replace(/&apos;/g, "'")
-		.replace(/&nbsp;/g, " ");
+		.replace(/&nbsp;/g, " ")
+		.replace(/&amp;/g, "&");
 }
 
 export function getSnippetText(
@@ -101,15 +114,18 @@ export function getSnippetText(
 ): string {
 	if (!snippet) return "";
 
-	const clean = decodeHtmlEntities(
-		snippet
+	let current = snippet;
+	let last;
+	do {
+		last = current;
+		current = current
 			.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
 			.replace(/<style[^>]*>[\s\S]*/gi, "")
 			.replace(/<[^>]*>/g, " ")
-			.replace(/<[^>]*$/g, ""),
-	)
-		.replace(/\s+/g, " ")
-		.trim();
+			.replace(/<[^>]*$/g, "");
+	} while (current !== last);
+
+	const clean = decodeHtmlEntities(current).replace(/\s+/g, " ").trim();
 
 	if (!clean) return "";
 	return clean.length > maxLength ? `${clean.slice(0, maxLength)}...` : clean;
