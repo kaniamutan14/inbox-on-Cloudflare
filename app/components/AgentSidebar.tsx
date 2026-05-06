@@ -3,7 +3,7 @@
 //     https://opensource.org/licenses/Apache-2.0
 
 import { Loader } from "@cloudflare/kumo";
-import { PlugsIcon, RobotIcon, X } from "@phosphor-icons/react";
+import { PlugsIcon, RobotIcon, XIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { useUIStore } from "~/hooks/useUIStore";
 import MCPPanel from "./MCPPanel";
@@ -79,7 +79,7 @@ export default function AgentSidebar() {
 					className="ml-auto px-4 py-2.5 text-kumo-subtle hover:text-kumo-default lg:hidden cursor-pointer"
 					aria-label="Close panel"
 				>
-					<X size={20} />
+					<XIcon size={20} />
 				</button>
 			</div>
 
