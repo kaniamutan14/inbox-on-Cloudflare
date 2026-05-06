@@ -52,6 +52,18 @@ export default function MailboxRoute() {
 				/>
 			)}
 
+			{/* Agent panel overlay backdrop for mobile */}
+			{isAgentPanelOpen && (
+				<div
+					className="fixed inset-0 z-30 bg-black/30 lg:hidden"
+					onClick={closePanel}
+					onKeyDown={(e) => e.key === "Escape" && closePanel()}
+					role="button"
+					tabIndex={-1}
+					aria-label="Close agent panel"
+				/>
+			)}
+
 			{/* Sidebar: hidden on mobile by default, shown as overlay when open */}
 			<div
 				className={`fixed inset-y-0 left-0 z-40 w-64 transform transition-transform duration-200 ease-in-out md:relative md:translate-x-0 md:z-0 ${
@@ -69,12 +81,14 @@ export default function MailboxRoute() {
 				</main>
 			</div>
 
-			{/* Agent + MCP sidebar -- togglable on desktop */}
-			{isAgentPanelOpen && (
-				<div className="hidden lg:flex w-[380px] shrink-0 border-l border-kumo-line flex-col bg-kumo-base overflow-hidden">
-					<AgentSidebar />
-				</div>
-			)}
+			{/* Agent + MCP sidebar -- persistent on desktop, drawer on mobile */}
+			<div
+				className={`fixed inset-y-0 right-0 z-40 w-[90%] max-w-[380px] transform transition-transform duration-200 ease-in-out border-l border-kumo-line bg-kumo-base flex flex-col overflow-hidden lg:relative lg:translate-x-0 lg:z-0 lg:w-[380px] ${
+					isAgentPanelOpen ? "translate-x-0" : "translate-x-full lg:hidden"
+				}`}
+			>
+				<AgentSidebar />
+			</div>
 
 			<ComposeEmail />
 		</div>
