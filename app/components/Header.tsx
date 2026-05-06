@@ -128,7 +128,7 @@ export default function Header() {
 						icon={<RobotIcon size={20} />}
 						onClick={toggleAgentPanel}
 						aria-label="Toggle agent panel"
-						className="hidden lg:inline-flex"
+						className="inline-flex"
 					/>
 				</Tooltip>
 				<Tooltip content={theme === "dark" ? "Light mode" : "Dark mode"} side="bottom" asChild>
