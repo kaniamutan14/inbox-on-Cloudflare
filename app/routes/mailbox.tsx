@@ -20,6 +20,7 @@ export default function MailboxRoute() {
 		isSidebarOpen,
 		closeSidebar,
 		isAgentPanelOpen,
+		closeAgentPanel,
 		closePanel,
 		closeComposeModal,
 	} = useUIStore();
@@ -30,13 +31,14 @@ export default function MailboxRoute() {
 			mailboxId &&
 			prevMailboxIdRef.current !== mailboxId
 		) {
+			closeAgentPanel();
 			closePanel();
 			closeComposeModal();
 			closeSidebar();
 		}
 
 		prevMailboxIdRef.current = mailboxId;
-	}, [mailboxId, closeComposeModal, closePanel, closeSidebar]);
+	}, [mailboxId, closeComposeModal, closePanel, closeSidebar, closeAgentPanel]);
 
 	return (
 		<div className="flex h-screen overflow-hidden">
@@ -56,8 +58,8 @@ export default function MailboxRoute() {
 			{isAgentPanelOpen && (
 				<div
 					className="fixed inset-0 z-30 bg-black/30 lg:hidden"
-					onClick={closePanel}
-					onKeyDown={(e) => e.key === "Escape" && closePanel()}
+					onClick={closeAgentPanel}
+					onKeyDown={(e) => e.key === "Escape" && closeAgentPanel()}
 					role="button"
 					tabIndex={-1}
 					aria-label="Close agent panel"

@@ -44,6 +44,7 @@ interface UIState {
 	isAgentPanelOpen: boolean;
 	toggleAgentPanel: () => void;
 	openAgentPanel: () => void;
+	closeAgentPanel: () => void;
 
 	// AI Draft trigger
 	pendingAiDraft: PendingAiDraft | null;
@@ -96,6 +97,7 @@ export const useUIStore = create<UIState>((set, get) => ({
 
 	toggleAgentPanel: () => set({ isAgentPanelOpen: !get().isAgentPanelOpen }),
 	openAgentPanel: () => set({ isAgentPanelOpen: true }),
+	closeAgentPanel: () => set({ isAgentPanelOpen: false }),
 
 	pendingAiDraft: null,
 	setPendingAiDraft: (draft) => set({ pendingAiDraft: draft }),

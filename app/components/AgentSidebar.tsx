@@ -42,7 +42,7 @@ function LazyAgentPanel() {
 }
 
 export default function AgentSidebar() {
-	const { closePanel } = useUIStore();
+	const { closeAgentPanel } = useUIStore();
 	const [activeTab, setActiveTab] = useState<"agent" | "mcp">("agent");
 
 	return (
@@ -75,7 +75,7 @@ export default function AgentSidebar() {
 				</button>
 				<button
 					type="button"
-					onClick={closePanel}
+					onClick={closeAgentPanel}
 					className="ml-auto px-4 py-2.5 text-kumo-subtle hover:text-kumo-default lg:hidden cursor-pointer"
 					aria-label="Close panel"
 				>
