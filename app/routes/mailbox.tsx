@@ -40,6 +40,18 @@ export default function MailboxRoute() {
 		prevMailboxIdRef.current = mailboxId;
 	}, [mailboxId, closeComposeModal, closePanel, closeSidebar, closeAgentPanel]);
 
+	useEffect(() => {
+		if (isAgentPanelOpen && window.innerWidth < 1024) {
+			document.body.style.overflow = "hidden";
+		} else {
+			document.body.style.overflow = "";
+		}
+
+		return () => {
+			document.body.style.overflow = "";
+		};
+	}, [isAgentPanelOpen]);
+
 	return (
 		<div className="flex h-screen overflow-hidden">
 			{/* Mobile sidebar overlay backdrop */}
