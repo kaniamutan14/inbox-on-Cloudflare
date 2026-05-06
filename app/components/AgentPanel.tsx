@@ -327,7 +327,10 @@ function AgentChatConnected({
 	}, [messages]);
 
 	useEffect(() => {
-		inputRef.current?.focus();
+		// Only auto-focus the chat input if we are on a desktop device
+		if (window.innerWidth >= 1024) {
+			inputRef.current?.focus();
+		}
 	}, []);
 
 	const handleSend = () => {
