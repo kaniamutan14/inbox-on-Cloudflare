@@ -16,14 +16,12 @@ export default function MailboxRoute() {
 	// Prefetch mailbox data for child components
 	useMailbox(mailboxId);
 	const prevMailboxIdRef = useRef<string | undefined>(undefined);
-	const {
-		isSidebarOpen,
-		closeSidebar,
-		isAgentPanelOpen,
-		closeAgentPanel,
-		closePanel,
-		closeComposeModal,
-	} = useUIStore();
+	const isSidebarOpen = useUIStore((state) => state.isSidebarOpen);
+	const closeSidebar = useUIStore((state) => state.closeSidebar);
+	const isAgentPanelOpen = useUIStore((state) => state.isAgentPanelOpen);
+	const closeAgentPanel = useUIStore((state) => state.closeAgentPanel);
+	const closePanel = useUIStore((state) => state.closePanel);
+	const closeComposeModal = useUIStore((state) => state.closeComposeModal);
 
 	useEffect(() => {
 		if (
