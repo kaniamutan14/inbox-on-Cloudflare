@@ -3,8 +3,9 @@
 //     https://opensource.org/licenses/Apache-2.0
 
 import { Loader } from "@cloudflare/kumo";
-import { PlugsIcon, RobotIcon } from "@phosphor-icons/react";
+import { PlugsIcon, RobotIcon, X } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
+import { useUIStore } from "~/hooks/useUIStore";
 import MCPPanel from "./MCPPanel";
 
 function LazyAgentPanel() {
@@ -41,6 +42,7 @@ function LazyAgentPanel() {
 }
 
 export default function AgentSidebar() {
+	const { closePanel } = useUIStore();
 	const [activeTab, setActiveTab] = useState<"agent" | "mcp">("agent");
 
 	return (
@@ -70,6 +72,14 @@ export default function AgentSidebar() {
 				>
 					<PlugsIcon size={14} weight={activeTab === "mcp" ? "fill" : "regular"} />
 					MCP
+				</button>
+				<button
+					type="button"
+					onClick={closePanel}
+					className="ml-auto px-4 py-2.5 text-kumo-subtle hover:text-kumo-default lg:hidden cursor-pointer"
+					aria-label="Close panel"
+				>
+					<X size={20} />
 				</button>
 			</div>
 
