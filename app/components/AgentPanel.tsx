@@ -305,7 +305,7 @@ function AgentChatConnected({
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLTextAreaElement>(null);
 	const [inputValue, setInputValue] = useState("");
-	const { startCompose, pendingAiDraft, setPendingAiDraft } = useUIStore();
+	const { isAgentPanelOpen, startCompose, pendingAiDraft, setPendingAiDraft } = useUIStore();
 
 	const agent = useAgent({ agent: "EmailAgent", name: mailboxId });
 	const { messages, sendMessage, status, setMessages, stop, clearHistory } =
@@ -327,11 +327,10 @@ function AgentChatConnected({
 	}, [messages]);
 
 	useEffect(() => {
-		// Only auto-focus the chat input if we are on a desktop device
-		if (window.innerWidth >= 1024) {
+		if (isAgentPanelOpen && window.innerWidth >= 1280) {
 			inputRef.current?.focus();
 		}
-	}, []);
+	}, [isAgentPanelOpen]);
 
 	const handleSend = () => {
 		const text = inputValue.trim();

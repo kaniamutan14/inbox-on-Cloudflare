@@ -39,13 +39,19 @@ export default function MailboxRoute() {
 	}, [mailboxId, closeComposeModal, closePanel, closeSidebar, closeAgentPanel]);
 
 	useEffect(() => {
-		if (isAgentPanelOpen && window.innerWidth < 1280) {
-			document.body.style.overflow = "hidden";
-		} else {
-			document.body.style.overflow = "";
-		}
+		const checkScrollLock = () => {
+			if (isAgentPanelOpen && window.innerWidth < 1280) {
+				document.body.style.overflow = "hidden";
+			} else {
+				document.body.style.overflow = "";
+			}
+		};
+
+		checkScrollLock();
+		window.addEventListener("resize", checkScrollLock);
 
 		return () => {
+			window.removeEventListener("resize", checkScrollLock);
 			document.body.style.overflow = "";
 		};
 	}, [isAgentPanelOpen]);
