@@ -41,7 +41,7 @@ export default function MailboxRoute() {
 	}, [mailboxId, closeComposeModal, closePanel, closeSidebar, closeAgentPanel]);
 
 	useEffect(() => {
-		if (isAgentPanelOpen && window.innerWidth < 1024) {
+		if (isAgentPanelOpen && window.innerWidth < 1280) {
 			document.body.style.overflow = "hidden";
 		} else {
 			document.body.style.overflow = "";
@@ -69,11 +69,11 @@ export default function MailboxRoute() {
 			{/* Agent panel overlay backdrop for mobile */}
 			{isAgentPanelOpen && (
 				<div
-					className="fixed inset-0 z-30 bg-black/30 lg:hidden"
+					className="fixed inset-0 z-30 bg-black/30 xl:hidden"
 					onClick={closeAgentPanel}
 					onKeyDown={(e) => e.key === "Escape" && closeAgentPanel()}
 					role="button"
-					tabIndex={-1}
+					tabIndex={0}
 					aria-label="Close agent panel"
 				/>
 			)}
@@ -97,8 +97,8 @@ export default function MailboxRoute() {
 
 			{/* Agent + MCP sidebar -- persistent on desktop, drawer on mobile */}
 			<div
-				className={`fixed inset-y-0 right-0 z-40 w-[90%] max-w-[380px] transform transition-transform duration-200 ease-in-out border-l border-kumo-line bg-kumo-base flex flex-col overflow-hidden lg:relative lg:translate-x-0 lg:z-0 lg:w-[380px] ${
-					isAgentPanelOpen ? "translate-x-0" : "translate-x-full lg:hidden"
+				className={`fixed inset-y-0 right-0 z-40 w-[90%] max-w-[380px] transform transition-transform duration-200 ease-in-out border-l border-kumo-line bg-kumo-base flex flex-col overflow-hidden xl:relative xl:translate-x-0 xl:z-0 xl:w-[380px] ${
+					isAgentPanelOpen ? "translate-x-0" : "translate-x-full xl:hidden"
 				}`}
 			>
 				<AgentSidebar />

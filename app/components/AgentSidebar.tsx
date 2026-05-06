@@ -76,7 +76,7 @@ export default function AgentSidebar() {
 				<button
 					type="button"
 					onClick={closeAgentPanel}
-					className="ml-auto px-4 py-2.5 text-kumo-subtle hover:text-kumo-default lg:hidden cursor-pointer"
+					className="ml-auto px-4 py-2.5 text-kumo-subtle hover:text-kumo-default xl:hidden cursor-pointer"
 					aria-label="Close panel"
 				>
 					<XIcon size={20} />
