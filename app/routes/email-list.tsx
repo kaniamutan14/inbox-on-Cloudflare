@@ -211,6 +211,11 @@ export default function EmailListRoute() {
 		}
 	}, [mailboxId, folder, closePanel]);
 
+	// Clear selection when navigating between pages
+	useEffect(() => {
+		setSelectedIds(new Set());
+	}, [page]);
+
 	const toggleStar = (e: React.MouseEvent, email: Email) => {
 		e.preventDefault();
 		e.stopPropagation();
@@ -417,7 +422,7 @@ export default function EmailListRoute() {
 						<div className="flex items-center gap-3">
 							<input
 								type="checkbox"
-								checked={emails.slice(0, Math.min(10, emails.length)).every(e => selectedIds.has(e.id))}
+								checked={emails.length > 0 && emails.slice(0, Math.min(10, emails.length)).every(e => selectedIds.has(e.id))}
 								ref={el => {
 									if (el) {
 										const count = emails.slice(0, Math.min(10, emails.length)).filter(e => selectedIds.has(e.id)).length;
@@ -607,9 +612,12 @@ export default function EmailListRoute() {
 										{/* Selection Checkbox & Avatar */}
 										<div className="relative w-10 h-10 shrink-0 select-none">
 											{/* Hover/Selected Checkbox */}
-											<div className={`absolute inset-0 flex items-center justify-center transition-all bg-kumo-base z-10 rounded-full ${
-												isSelected ? "opacity-100 scale-100" : "opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 focus-within:opacity-100 focus-within:scale-100"
-											}`}>
+											<div 
+												className={`absolute inset-0 flex items-center justify-center transition-all bg-kumo-base z-10 rounded-full ${
+													isSelected ? "opacity-100 scale-100" : "opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 focus-within:opacity-100 focus-within:scale-100"
+												}`}
+												onClick={(e) => e.stopPropagation()}
+											>
 												<input
 													type="checkbox"
 													checked={isSelected}
@@ -692,8 +700,8 @@ export default function EmailListRoute() {
 											</div>
 										</div>
 
-										{/* Hover actions (desktop only) */}
-										<div className="hidden group-hover:flex items-center shrink-0 ml-2 bg-gradient-to-l from-kumo-base via-kumo-base/90 to-transparent pl-8 pr-2 h-full absolute right-0 top-0 z-20">
+										{/* Hover actions (desktop only, persistent on mobile) */}
+										<div className="flex md:hidden md:group-hover:flex items-center shrink-0 ml-2 bg-gradient-to-l from-kumo-base via-kumo-base/90 to-transparent pl-8 pr-2 h-full absolute right-0 top-0 z-20">
 											<Tooltip content={email.read ? "Mark unread" : "Mark read"} asChild>
 												<Button
 													variant="ghost"

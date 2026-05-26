@@ -324,7 +324,12 @@ function AgentChatConnected({
 
 	useEffect(() => {
 		const el = scrollRef.current;
-		if (el) el.scrollTop = el.scrollHeight;
+		if (el) {
+			const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 150;
+			if (isNearBottom || messages[messages.length - 1]?.role === "user") {
+				el.scrollTop = el.scrollHeight;
+			}
+		}
 	}, [messages]);
 
 	useEffect(() => {
