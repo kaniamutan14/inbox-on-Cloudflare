@@ -418,7 +418,7 @@ export default function EmailListRoute() {
 			<div className="flex flex-col h-full overflow-hidden bg-kumo-surface relative">
 				{/* Bulk operations bar OR Folder header */}
 				{selectedIds.size > 0 ? (
-					<div className="flex items-center justify-between px-4 py-3 bg-kumo-brand/5 border-b border-kumo-brand/20 shrink-0 md:px-5 h-[57px] animate-fade-in">
+					<div className="relative z-30 flex items-center justify-between px-4 py-3 bg-kumo-brand/5 border-b border-kumo-brand/20 shrink-0 md:px-5 h-[57px] animate-fade-in">
 						<div className="flex items-center gap-3">
 							<input
 								type="checkbox"
