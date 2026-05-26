@@ -211,3 +211,11 @@
   margin-top: 0.25em;
   margin-bottom: 0.25em;
 }
+
+/* Global Tooltip Dark Mode Contrast Fix */
+[data-mode="dark"] [role="tooltip"] {
+  background-color: #1f2937 !important; /* Tailwind gray-800 */
+  color: #f9fafb !important; /* Tailwind gray-50 */
+  border: 1px solid #374151 !important; /* Tailwind gray-700 */
+  font-weight: 500 !important;
+}

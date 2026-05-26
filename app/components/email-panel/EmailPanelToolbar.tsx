@@ -238,28 +238,34 @@ function MoveToFolderMenu({ folders, onMove, disabled }: { folders: Folder[]; on
 		return () => document.removeEventListener("mousedown", handler);
 	}, [open]);
 
+	const triggerButton = (
+		<Button
+			variant="ghost"
+			shape="square"
+			size="sm"
+			disabled={disabled}
+			icon={<FolderSimpleIcon size={18} />}
+			onClick={() => setOpen((o) => !o)}
+			aria-label="Move to folder"
+		/>
+	);
+
 	return (
 		<div ref={ref} className="relative">
-			<Tooltip content="Move to folder" side="bottom" asChild>
-				<Button
-					variant="ghost"
-					shape="square"
-					size="sm"
-					disabled={disabled}
-					icon={<FolderSimpleIcon size={18} />}
-					onClick={() => setOpen((o) => !o)}
-					aria-label="Move to folder"
-				/>
-			</Tooltip>
+			{open ? triggerButton : (
+				<Tooltip content="Move to folder" side="bottom" asChild>
+					{triggerButton}
+				</Tooltip>
+			)}
 			{open && (
-				<div className="absolute top-full left-0 z-50 mt-1 min-w-[160px] rounded-lg border border-kumo-line bg-kumo-elevated shadow-lg py-1">
-					<div className="px-3 py-1.5 text-xs font-medium text-kumo-subtle">Move to</div>
-					<div className="h-px bg-kumo-line my-1" />
+				<div className="absolute top-full left-0 z-50 mt-1 min-w-[160px] rounded-lg border border-kumo-line bg-kumo-base shadow-xl py-1 dark:bg-gray-800 dark:border-gray-600">
+					<div className="px-3 py-1.5 text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider">Move to</div>
+					<div className="h-px bg-kumo-line my-1 dark:bg-gray-700" />
 					{folders.map((f) => (
 						<button
 							key={f.id}
 							type="button"
-							className="w-full text-left px-3 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-blue-600 hover:text-white transition-all duration-150"
+							className="w-full text-left px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white hover:bg-blue-600 hover:text-white transition-all duration-150"
 							onClick={() => { onMove(f.id); setOpen(false); }}
 						>
 							{f.name}
