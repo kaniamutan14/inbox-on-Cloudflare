@@ -493,7 +493,7 @@ export default function EmailListRoute() {
 							
 							{/* Move to Folder */}
 							<div className="relative">
-								<Tooltip content="Move to Folder" side="bottom" asChild>
+								{isMoveMenuOpen ? (
 									<Button
 										variant="ghost"
 										shape="square"
@@ -502,12 +502,23 @@ export default function EmailListRoute() {
 										onClick={() => setIsMoveMenuOpen(!isMoveMenuOpen)}
 										aria-label="Move selected to folder"
 									/>
-								</Tooltip>
+								) : (
+									<Tooltip content="Move to Folder" side="bottom" asChild>
+										<Button
+											variant="ghost"
+											shape="square"
+											size="sm"
+											icon={<FolderIcon size={18} />}
+											onClick={() => setIsMoveMenuOpen(!isMoveMenuOpen)}
+											aria-label="Move selected to folder"
+										/>
+									</Tooltip>
+								)}
 								{isMoveMenuOpen && (
 									<>
 										<div className="fixed inset-0 z-45" onClick={() => setIsMoveMenuOpen(false)} />
-										<div className="absolute right-0 mt-1.5 w-48 rounded-xl bg-kumo-base border border-kumo-line shadow-lg py-1.5 z-50 animate-fade-in max-h-60 overflow-y-auto">
-											<div className="px-3 py-1.5 text-xs font-semibold text-kumo-subtle uppercase border-b border-kumo-line/40 mb-1">
+										<div className="absolute right-0 mt-1.5 w-48 rounded-xl bg-kumo-base border border-kumo-line shadow-xl py-1.5 z-50 animate-fade-in max-h-60 overflow-y-auto dark:bg-gray-800 dark:border-gray-600">
+											<div className="px-3 py-1.5 text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider border-b border-kumo-line/40 mb-1 dark:border-gray-700">
 												Move to
 											</div>
 											{folders
@@ -517,7 +528,7 @@ export default function EmailListRoute() {
 														key={f.id}
 														type="button"
 														onClick={() => handleMoveBulk(f.id)}
-														className="w-full text-left px-3.5 py-2 text-sm text-kumo-strong hover:bg-kumo-tint hover:text-kumo-default transition-colors truncate"
+														className="w-full text-left px-3.5 py-2 text-sm font-semibold text-gray-900 dark:text-white hover:bg-blue-600 hover:text-white transition-all duration-150 truncate"
 													>
 														{f.name}
 													</button>
