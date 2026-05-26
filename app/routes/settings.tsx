@@ -7,6 +7,7 @@ import { RobotIcon, ArrowCounterClockwiseIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { useMailbox, useUpdateMailbox } from "~/queries/mailboxes";
+import { useThemeStore } from "~/hooks/useThemeStore";
 
 // Placeholder shown in the textarea when no custom prompt is set.
 // The authoritative default prompt lives in workers/agent/index.ts (DEFAULT_SYSTEM_PROMPT).
@@ -21,6 +22,8 @@ export default function SettingsRoute() {
 	const [displayName, setDisplayName] = useState("");
 	const [agentPrompt, setAgentPrompt] = useState("");
 	const [isSaving, setIsSaving] = useState(false);
+	
+	const { themePreference, setThemePreference } = useThemeStore();
 
 	useEffect(() => {
 		if (mailbox) {
@@ -88,6 +91,56 @@ export default function SettingsRoute() {
 							disabled 
 							className="w-full font-medium text-kumo-subtle opacity-75"
 						/>
+					</div>
+				</div>
+
+				{/* Appearance */}
+				<div className="rounded-2xl border border-kumo-line/50 bg-kumo-base p-6 shadow-2xs">
+					<div className="text-sm font-bold text-kumo-strong mb-4 pb-2 border-b border-kumo-line/30 uppercase tracking-wider text-[11px] text-kumo-subtle">
+						Appearance
+					</div>
+					<div className="space-y-4">
+						<div className="flex items-center justify-between">
+							<div>
+								<h3 className="text-sm font-semibold text-kumo-strong">Theme Mode</h3>
+								<p className="text-xs text-kumo-subtle mt-1">Sync with your system or manually override.</p>
+							</div>
+							<div className="flex items-center gap-2 bg-kumo-recessed p-1 rounded-xl border border-kumo-line/50 shrink-0">
+								<button
+									type="button"
+									onClick={() => setThemePreference("system")}
+									className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+										themePreference === "system"
+											? "bg-kumo-base shadow-xs text-kumo-strong border border-kumo-line/30"
+											: "text-kumo-subtle hover:text-kumo-strong hover:bg-kumo-base/50"
+									}`}
+								>
+									Auto
+								</button>
+								<button
+									type="button"
+									onClick={() => setThemePreference("light")}
+									className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+										themePreference === "light"
+											? "bg-kumo-base shadow-xs text-kumo-strong border border-kumo-line/30"
+											: "text-kumo-subtle hover:text-kumo-strong hover:bg-kumo-base/50"
+									}`}
+								>
+									Light
+								</button>
+								<button
+									type="button"
+									onClick={() => setThemePreference("dark")}
+									className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+										themePreference === "dark"
+											? "bg-kumo-base shadow-xs text-kumo-strong border border-kumo-line/30"
+											: "text-kumo-subtle hover:text-kumo-strong hover:bg-kumo-base/50"
+									}`}
+								>
+									Dark
+								</button>
+							</div>
+						</div>
 					</div>
 				</div>
 

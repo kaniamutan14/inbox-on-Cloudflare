@@ -17,7 +17,7 @@ export default function Header() {
 	const location = useLocation();
 	const [searchParams] = useSearchParams();
 	const { toggleSidebar, toggleAgentPanel, isAgentPanelOpen } = useUIStore();
-	const { theme, toggleTheme } = useThemeStore();
+	const { activeTheme, toggleTheme } = useThemeStore();
 
 	// Sync search input with URL query param so it stays populated
 	const urlQuery = searchParams.get("q") || "";
@@ -146,11 +146,11 @@ export default function Header() {
 						className="inline-flex hover:scale-105 transition-all duration-150"
 					/>
 				</Tooltip>
-				<Tooltip content={theme === "dark" ? "Light mode" : "Dark mode"} side="bottom" asChild>
+				<Tooltip content={activeTheme === "dark" ? "Light mode" : "Dark mode"} side="bottom" asChild>
 					<Button
 						variant="ghost"
 						shape="square"
-						icon={theme === "dark" ? <SunIcon size={20} /> : <MoonIcon size={20} />}
+						icon={activeTheme === "dark" ? <SunIcon size={20} /> : <MoonIcon size={20} />}
 						onClick={toggleTheme}
 						aria-label="Toggle theme"
 						className="hover:scale-105 transition-all duration-150"

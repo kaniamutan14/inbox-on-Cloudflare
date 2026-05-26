@@ -77,12 +77,12 @@ const KumoLink = forwardRef<
 
 export function Layout({ children }: { children: React.ReactNode }) {
 	return (
-		<html lang="en">
+		<html lang="en" suppressHydrationWarning>
 			<head>
 				<meta charSet="UTF-8" />
 				<script
 					dangerouslySetInnerHTML={{
-						__html: `(function(){var s=localStorage.getItem('theme');var t=s||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.setAttribute('data-mode',t)})();`,
+						__html: `(function(){try{var m=localStorage.getItem('themeMode');var o=localStorage.getItem('theme');var s=m||(o==='light'||o==='dark'?o:'system');var t=s==='system'?(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'):s;document.documentElement.setAttribute('data-mode',t)}catch(e){}})();`,
 					}}
 				/>
 				<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -117,10 +117,20 @@ export function HydrateFallback() {
 	);
 }
 
+import { useEffect } from "react";
+import { useThemeStore } from "~/hooks/useThemeStore";
+
 export default function App() {
 	// Use useState to ensure each SSR request gets a fresh client while the
 	// browser reuses the same singleton across navigations.
 	const [queryClient] = useState(getQueryClient);
+	
+	const syncActiveTheme = useThemeStore((s) => s.syncActiveTheme);
+	useEffect(() => {
+		// Ensures DOM and Zustand store match perfectly after React hydration
+		syncActiveTheme();
+	}, [syncActiveTheme]);
+
 	return (
 		<QueryClientProvider client={queryClient}>
 			<LinkProvider component={KumoLink}>
