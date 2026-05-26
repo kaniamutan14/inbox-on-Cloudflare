@@ -57,17 +57,26 @@ function FolderLink({
 			to={to}
 			onClick={onClick}
 			className={({ isActive }) =>
-				`flex items-center gap-3 py-2 px-3 rounded-md text-sm transition-colors ${
+				`flex items-center gap-3.5 py-2.5 px-4 rounded-xl text-sm font-medium transition-all relative overflow-hidden ${
 					isActive
-						? "bg-kumo-fill font-semibold text-kumo-default"
-						: "text-kumo-strong hover:bg-kumo-tint"
+						? "bg-kumo-brand/10 text-kumo-brand font-semibold"
+						: "text-kumo-strong hover:bg-kumo-tint/60"
 				}`
 			}
 		>
-			<span className="shrink-0">{icon}</span>
-			<span className="truncate flex-1">{label}</span>
-			{unreadCount != null && unreadCount > 0 && (
-				<Badge variant="secondary">{unreadCount}</Badge>
+			{({ isActive }) => (
+				<>
+					{isActive && (
+						<span className="absolute left-0 top-0 bottom-0 w-1 bg-kumo-brand rounded-r-md" />
+					)}
+					<span className="shrink-0 text-current">{icon}</span>
+					<span className="truncate flex-1">{label}</span>
+					{unreadCount != null && unreadCount > 0 && (
+						<Badge variant={isActive ? "primary" : "secondary"} className="font-semibold text-xs py-0.5 px-2 rounded-full">
+							{unreadCount}
+						</Badge>
+					)}
+				</>
 			)}
 		</NavLink>
 	);
@@ -146,40 +155,40 @@ export default function Sidebar() {
 	};
 
 	return (
-		<aside className="h-full w-64 bg-kumo-recessed flex flex-col shrink-0 border-r border-kumo-line">
+		<aside className="h-full w-full bg-kumo-recessed flex flex-col shrink-0 border-r border-kumo-line/80 shadow-xs">
 			{/* Back + identity */}
-			<div className="px-4 pt-4 pb-1">
+			<div className="px-5 pt-5 pb-3">
 				<button
 					type="button"
 					onClick={() => {
 						navigate("/");
 						closeSidebar();
 					}}
-					className="flex items-center gap-1.5 text-kumo-subtle text-sm hover:text-kumo-default transition-colors mb-2.5 cursor-pointer bg-transparent border-0 p-0"
+					className="flex items-center gap-1.5 text-kumo-subtle text-xs font-medium uppercase tracking-wider hover:text-kumo-brand transition-colors mb-4 cursor-pointer bg-transparent border-0 p-0"
 				>
-					<CaretLeftIcon size={14} />
+					<CaretLeftIcon size={12} weight="bold" />
 					<span>Mailboxes</span>
 				</button>
-				<div className="px-1">
-					<div className="text-base font-semibold text-kumo-default truncate">
+				<div className="px-1 border-b border-kumo-line/30 pb-3">
+					<div className="text-base font-semibold text-kumo-strong truncate">
 						{displayName}
 					</div>
-					<div className="text-sm text-kumo-subtle truncate mt-0.5">
+					<div className="text-xs text-kumo-subtle truncate mt-0.5">
 						{currentMailbox?.email || mailboxId}
 					</div>
 				</div>
 			</div>
 
 			{/* Compose */}
-			<div className="px-3 py-3">
-				<Button
-					variant="primary"
-					icon={<PencilSimpleIcon size={16} />}
+			<div className="px-4 py-3">
+				<button
+					type="button"
 					onClick={() => startCompose()}
-					className="w-full"
+					className="flex items-center justify-center gap-3 w-full py-3 px-4 rounded-full font-semibold text-sm shadow-md text-white hover:shadow-lg transition-all duration-200 cursor-pointer border-0 bg-gradient-to-r from-blue-600 to-blue-500 hover:brightness-105 active:scale-98"
 				>
-					Compose
-				</Button>
+					<PencilSimpleIcon size={18} weight="bold" />
+					<span>Compose</span>
+				</button>
 			</div>
 
 			{/* Navigation */}

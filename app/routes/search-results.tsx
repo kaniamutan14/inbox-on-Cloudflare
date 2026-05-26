@@ -86,17 +86,73 @@ export default function SearchResultsRoute() {
 							{urlQuery && <p className="text-xs text-kumo-subtle mt-3 max-w-sm">Tip: Use operators like <code className="bg-kumo-tint px-1 rounded">from:name</code>, <code className="bg-kumo-tint px-1 rounded">is:unread</code>, <code className="bg-kumo-tint px-1 rounded">has:attachment</code>, <code className="bg-kumo-tint px-1 rounded">before:2025-01-01</code></p>}
 						</div>
 					) : (
-						<div>{results.map((email) => {
+						<div className="divide-y divide-kumo-line/45">{results.map((email) => {
 							const isSelected = selectedEmailId === email.id;
 							const snippet = getSnippetText(email.snippet, 120);
 							const folderName = (email as Email & { folder_name?: string }).folder_name;
+							const senderName = email.sender.split("@")[0];
+							
+							const initials = senderName.trim().charAt(0).toUpperCase();
+							let hash = 0;
+							for (let i = 0; i < senderName.length; i++) {
+								hash = senderName.charCodeAt(i) + ((hash << 5) - hash);
+							}
+							const colorIndex = Math.abs(hash) % 8;
+							const avatarColorClass = `avatar-color-${colorIndex}`;
+
 							return (
-								<div key={email.id} role="button" tabIndex={0} onClick={() => handleRowClick(email)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleRowClick(email); } }} className={`group flex items-center gap-3 w-full text-left cursor-pointer transition-colors border-b border-kumo-line px-4 py-2.5 md:px-5 md:py-3 ${isPanelOpen ? "md:px-4 md:py-2.5" : ""} ${isSelected ? "bg-kumo-tint" : "hover:bg-kumo-tint"}`}>
-									<div className="w-2.5 shrink-0 flex justify-center">{!email.read && <div className="h-2 w-2 rounded-full bg-kumo-brand" />}</div>
-									<div className="min-w-0 flex-1">
-										<div className="flex items-center gap-2"><span className={`truncate text-sm ${!email.read ? "font-semibold text-kumo-default" : "text-kumo-strong"}`}>{highlightTerms(email.sender.split("@")[0], urlQuery)}</span>{folderName && <Badge variant="outline">{folderDisplayName(folderName)}</Badge>}<span className="text-sm text-kumo-subtle shrink-0 ml-auto">{formatListDate(email.date)}</span></div>
-										<div className={`truncate text-sm mt-0.5 ${!email.read ? "font-medium text-kumo-default" : "text-kumo-subtle"}`}>{highlightTerms(email.subject, urlQuery)}</div>
-										{snippet && <div className="truncate text-xs text-kumo-subtle mt-0.5">{highlightTerms(snippet, urlQuery)}</div>}
+								<div
+									key={email.id}
+									role="button"
+									tabIndex={0}
+									onClick={() => handleRowClick(email)}
+									onKeyDown={(e) => {
+										if (e.key === "Enter" || e.key === " ") {
+											e.preventDefault();
+											handleRowClick(email);
+										}
+									}}
+									className={`group flex items-start gap-3.5 w-full text-left cursor-pointer transition-all border-b border-kumo-line/40 px-4 py-3.5 md:px-5 md:py-4 relative overflow-hidden email-row-hover ${
+										isSelected 
+											? "bg-kumo-brand/5 border-l-3 border-l-kumo-brand pl-3 md:pl-4" 
+											: "bg-kumo-base hover:bg-kumo-tint/30 border-l-3 border-l-transparent pl-3 md:pl-4"
+									}`}
+								>
+									{/* Avatar */}
+									<div className="relative w-10 h-10 shrink-0 select-none">
+										<div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-xs transition-transform ${avatarColorClass}`}>
+											{initials}
+											{!email.read && (
+												<span className="absolute top-0 right-0 block h-2.5 w-2.5 rounded-full ring-2 ring-kumo-base bg-kumo-brand" />
+											)}
+										</div>
+									</div>
+
+									{/* Content */}
+									<div className="min-w-0 flex-1 pr-6 md:pr-0">
+										<div className="flex items-center gap-2">
+											<span className={`truncate text-sm ${!email.read ? "font-bold text-kumo-strong" : "text-kumo-strong/80 font-medium"}`}>
+												{highlightTerms(senderName, urlQuery)}
+											</span>
+											{folderName && (
+												<Badge variant="outline" className="border-kumo-line bg-kumo-tint/20 text-[10px] py-0.5 px-1.5 font-bold uppercase tracking-wider">
+													{folderDisplayName(folderName)}
+												</Badge>
+											)}
+											<span className="text-xs text-kumo-subtle shrink-0 ml-auto font-medium">
+												{formatListDate(email.date)}
+											</span>
+										</div>
+										<div className="truncate text-xs md:text-sm mt-1 text-kumo-strong">
+											<span className={!email.read ? "font-semibold text-kumo-strong" : "text-kumo-subtle font-medium"}>
+												{highlightTerms(email.subject, urlQuery)}
+											</span>
+											{snippet && (
+												<span className="text-kumo-subtle/80 font-normal">
+													{" "}&mdash; {highlightTerms(snippet, urlQuery)}
+												</span>
+											)}
+										</div>
 									</div>
 								</div>
 							);

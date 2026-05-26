@@ -65,37 +65,44 @@ export default function SettingsRoute() {
 	const isCustomPrompt = agentPrompt.trim().length > 0;
 
 	return (
-		<div className="max-w-2xl px-4 py-4 md:px-8 md:py-6 h-full overflow-y-auto">
-			<h1 className="text-lg font-semibold text-kumo-default mb-6">Settings</h1>
+		<div className="max-w-2xl px-5 py-5 md:px-8 md:py-6 h-full overflow-y-auto bg-kumo-surface/30 animate-fade-in scrollbar-thin">
+			<h1 className="text-xl font-bold text-kumo-strong mb-6 tracking-tight">Settings</h1>
 
 			<div className="space-y-6">
 				{/* Account */}
-				<div className="rounded-lg border border-kumo-line bg-kumo-base p-5">
-					<div className="text-sm font-medium text-kumo-default mb-4">
+				<div className="rounded-2xl border border-kumo-line/50 bg-kumo-base p-6 shadow-2xs">
+					<div className="text-sm font-bold text-kumo-strong mb-4 pb-2 border-b border-kumo-line/30 uppercase tracking-wider text-[11px] text-kumo-subtle">
 						Account
 					</div>
-					<div className="space-y-3">
+					<div className="space-y-4">
 						<Input
 							label="Display Name"
 							value={displayName}
 							onChange={(e) => setDisplayName(e.target.value)}
+							className="w-full focus-within:ring-2 focus-within:ring-kumo-brand/10 transition-all duration-150 font-semibold text-kumo-strong"
 						/>
-						<Input label="Email" type="email" value={mailbox.email} disabled />
+						<Input 
+							label="Email Address" 
+							type="email" 
+							value={mailbox.email} 
+							disabled 
+							className="w-full font-medium text-kumo-subtle opacity-75"
+						/>
 					</div>
 				</div>
 
 				{/* Agent System Prompt */}
-				<div className="rounded-lg border border-kumo-line bg-kumo-base p-5">
-					<div className="flex items-center justify-between mb-4">
+				<div className="rounded-2xl border border-kumo-line/50 bg-kumo-base p-6 shadow-2xs">
+					<div className="flex items-center justify-between mb-4 pb-2 border-b border-kumo-line/30">
 						<div className="flex items-center gap-2">
-							<RobotIcon size={16} weight="duotone" className="text-kumo-subtle" />
-							<span className="text-sm font-medium text-kumo-default">
+							<RobotIcon size={18} weight="duotone" className="text-kumo-brand" />
+							<span className="text-sm font-bold text-kumo-strong uppercase tracking-wider text-[11px] text-kumo-subtle">
 								AI Agent Prompt
 							</span>
 							{isCustomPrompt ? (
-								<Badge variant="primary">Custom</Badge>
+								<Badge variant="primary" className="font-bold py-0.5 px-2 rounded-full text-xs">Custom</Badge>
 							) : (
-								<Badge variant="secondary">Default</Badge>
+								<Badge variant="secondary" className="font-bold py-0.5 px-2 rounded-full text-xs bg-kumo-tint/50">Default</Badge>
 							)}
 						</div>
 						{isCustomPrompt && (
@@ -104,31 +111,35 @@ export default function SettingsRoute() {
 								size="xs"
 								icon={<ArrowCounterClockwiseIcon size={14} />}
 								onClick={handleResetPrompt}
+								className="hover:bg-kumo-tint/60 transition-colors rounded-lg text-kumo-brand text-xs font-semibold"
 							>
 								Reset to default
 							</Button>
 						)}
 					</div>
-					<p className="text-xs text-kumo-subtle mb-3">
-						Customize how the AI agent behaves for this mailbox.
-						Leave empty to use the built-in default prompt.
+					<p className="text-xs text-kumo-subtle mb-3.5 leading-relaxed font-medium">
+						Customize how the AI agent behaves for this mailbox. Write rules about rules, formatting options, or draft instructions. Leave empty to use the built-in default prompt.
 					</p>
 					<textarea
 						value={agentPrompt}
 						onChange={(e) => setAgentPrompt(e.target.value)}
 						placeholder={PROMPT_PLACEHOLDER}
 						rows={12}
-						className="w-full resize-y rounded-lg border border-kumo-line bg-kumo-recessed px-3 py-2 text-xs text-kumo-default placeholder:text-kumo-subtle focus:outline-none focus:ring-1 focus:ring-kumo-ring font-mono leading-relaxed"
+						className="w-full resize-y rounded-xl border border-kumo-line bg-kumo-recessed px-4 py-3 text-xs text-kumo-strong placeholder:text-kumo-subtle focus:outline-none focus:ring-2 focus:ring-kumo-brand/10 focus:border-kumo-brand/60 transition-all font-mono leading-relaxed shadow-3xs"
 					/>
-					<p className="text-xs text-kumo-subtle mt-2">
-						The prompt is sent as the system message to the AI model.
-						It controls the agent's personality, writing style, and behavior rules.
+					<p className="text-xs text-kumo-subtle mt-2.5 leading-relaxed font-medium">
+						The prompt is sent as the system message to the AI model. It controls the agent's personality, writing style, and behavior rules.
 					</p>
 				</div>
 
 				{/* Save */}
-				<div className="flex justify-end">
-					<Button variant="primary" onClick={handleSave} loading={isSaving}>
+				<div className="flex justify-end pt-2">
+					<Button 
+						variant="primary" 
+						onClick={handleSave} 
+						loading={isSaving}
+						className="hover:scale-102 transition-transform bg-gradient-to-r from-blue-600 to-blue-500 shadow-xs px-6 py-2 rounded-xl font-semibold"
+					>
 						Save Changes
 					</Button>
 				</div>

@@ -2,28 +2,194 @@
 @import "@cloudflare/kumo/styles/tailwind";
 @import "tailwindcss";
 
-body {
-  margin: 0;
+@layer base {
+  :root {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    
+    /* Premium Light Mode Brand Colors (Gmail Blue accent) */
+    --color-kumo-brand: #1a73e8;
+    --color-kumo-brand-hover: #1557b0;
+    --color-kumo-brand-active: #174ea6;
+    --color-kumo-brand-subtle: #e8f0fe;
+    --color-kumo-brand-subtle-hover: #d2e3fc;
+    --color-kumo-brand-subtle-active: #b3d4ff;
+    
+    /* Micro-animation timing constants */
+    --transition-premium: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  [data-mode="dark"] {
+    /* Premium Slate/Ocean Dark Mode palette for high contrast and elegant visual look */
+    --color-kumo-surface: #0b0f19; /* dark slate/indigo hybrid */
+    --color-kumo-recessed: #030712; /* deepest black-blue */
+    --color-kumo-base: #111827; /* dark card background */
+    --color-kumo-tint: #1f2937; /* light dark gray border/sub-element */
+    --color-kumo-elevated: #111827;
+    --color-kumo-overlay: #1e293b;
+    --color-kumo-fill: #1f2937;
+    --color-kumo-fill-hover: #374151; /* hover dark */
+    --color-kumo-line: #1f2937;
+    --color-kumo-ring: #3b82f6;
+    --color-kumo-tip-stroke: #1f2937;
+    
+    --text-color-kumo-subtle: #9ca3af; /* slate-400 equivalent */
+    --text-color-kumo-strong: #f3f4f6; /* slate-100 equivalent */
+
+    /* Premium Dark Mode Brand Colors */
+    --color-kumo-brand: #3b82f6;
+    --color-kumo-brand-hover: #60a5fa;
+    --color-kumo-brand-active: #2563eb;
+    --color-kumo-brand-subtle: #172554; /* slate dark blue tint */
+    --color-kumo-brand-subtle-hover: #1e3a8a;
+    --color-kumo-brand-subtle-active: #1e40af;
+  }
+
+  body {
+    margin: 0;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
 }
 
-@layer base {
-  [data-mode="dark"] {
-    /* Slate (bluish-gray) palette for dark mode */
-    --color-kumo-surface: #020617; /* slate-950 */
-    --color-kumo-recessed: #0f172a; /* slate-900 */
-    --color-kumo-base: #1e293b; /* slate-800 */
-    --color-kumo-tint: #334155; /* slate-700 */
-    --color-kumo-elevated: #0f172a;
-    --color-kumo-overlay: #1e293b;
-    --color-kumo-fill: #334155;
-    --color-kumo-fill-hover: #475569; /* slate-600 */
-    --color-kumo-line: #334155;
-    --color-kumo-ring: #334155;
-    --color-kumo-tip-stroke: #334155;
-    
-    --text-color-kumo-subtle: #94a3b8; /* slate-400 */
-    --text-color-kumo-strong: #cbd5e1; /* slate-300 */
+/* Animations */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
   }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes gentle-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 14px 0 rgba(26, 115, 232, 0.4);
+  }
+  50% {
+    transform: scale(1.03);
+    box-shadow: 0 4px 20px 0 rgba(26, 115, 232, 0.6);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* Premium Classes & Utilities */
+.email-row-hover {
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+}
+.email-row-hover:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+[data-mode="dark"] .email-row-hover:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Shimmer Skeleton Loader */
+.skeleton-shimmer {
+  background: linear-gradient(90deg, var(--color-kumo-fill) 25%, var(--color-kumo-fill-hover) 37%, var(--color-kumo-fill) 63%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+/* Dynamic Entrance slide animations */
+.animate-slide-right {
+  animation: slide-in-right var(--transition-premium) forwards;
+}
+
+.animate-slide-left {
+  animation: slide-in-left var(--transition-premium) forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in var(--transition-premium) forwards;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Premium Compose FAB Styling */
+.fab-compose {
+  background: linear-gradient(135deg, #1a73e8 0%, #1557b0 100%);
+  animation: gentle-pulse 3s infinite ease-in-out;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+.fab-compose:hover {
+  filter: brightness(1.1);
+  transform: scale(1.05);
+}
+.fab-compose:active {
+  transform: scale(0.95);
+}
+
+[data-mode="dark"] .fab-compose {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+/* Deterministic Avatar Gradient classes (Gmail-inspired soft beautiful palettes) */
+.avatar-color-0 { background: linear-gradient(135deg, #f28b82, #d93025); } /* Red */
+.avatar-color-1 { background: linear-gradient(135deg, #fbbc04, #e37400); } /* Orange */
+.avatar-color-2 { background: linear-gradient(135deg, #fff475, #f0b400); } /* Yellow */
+.avatar-color-3 { background: linear-gradient(135deg, #ccff90, #137333); } /* Green */
+.avatar-color-4 { background: linear-gradient(135deg, #a7ffeb, #007b83); } /* Teal */
+.avatar-color-5 { background: linear-gradient(135deg, #cbf0f8, #185abc); } /* Blue */
+.avatar-color-6 { background: linear-gradient(135deg, #d7aefb, #861647); } /* Purple/Magenta */
+.avatar-color-7 { background: linear-gradient(135deg, #fdcfe8, #b06000); } /* Pink/Brown */
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-kumo-fill);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-kumo-fill-hover);
 }
 
 /* TipTap list styles */

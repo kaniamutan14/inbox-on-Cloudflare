@@ -65,73 +65,70 @@ export default function MCPPanel() {
 	const mcpUrl = `${baseUrl}/mcp`;
 
 	return (
-		<div className="flex flex-col h-full">
+		<div className="flex flex-col h-full bg-kumo-surface animate-fade-in">
 			{/* Content */}
-			<div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+			<div className="flex-1 overflow-y-auto px-4 py-5 space-y-5 scrollbar-thin">
 				{/* Intro */}
-				<div className="space-y-2">
-					<div className="flex items-center gap-2">
-						<div className="flex h-10 w-10 items-center justify-center rounded-xl bg-kumo-brand/10">
+				<div className="space-y-2.5">
+					<div className="flex items-center gap-3">
+						<div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-kumo-brand/10 shadow-3xs animate-float">
 							<PlugsIcon
-								size={20}
+								size={22}
 								weight="duotone"
 								className="text-kumo-brand"
 							/>
 						</div>
 						<div>
-							<h3 className="text-sm font-semibold text-kumo-default">
+							<h3 className="text-sm font-bold text-kumo-strong">
 								Connect via MCP
 							</h3>
-							<p className="text-xs text-kumo-subtle">
-								Model Context Protocol
+							<p className="text-xs text-kumo-subtle font-medium">
+								Model Context Protocol Link
 							</p>
 						</div>
 					</div>
-					<p className="text-xs text-kumo-subtle leading-relaxed">
-						This email agent exposes an MCP server so AI coding
-						assistants can manage your inbox directly — read emails,
-						search, draft replies, and send messages using natural
-						language.
+					<p className="text-xs text-kumo-subtle leading-relaxed bg-kumo-tint/20 px-3.5 py-3 rounded-xl border border-kumo-line/30 font-medium">
+						This email agent exposes a standard MCP server. You can connect coding assistants (like Cursor, Claude Code, or Windsurf) to securely query your mailbox, read threads, and draft replies using natural language.
 					</p>
 				</div>
 
 				{/* MCP URL */}
-				<div className="space-y-1.5">
-					<label className="text-xs font-medium text-kumo-strong block">
-						Server URL
+				<div className="space-y-2">
+					<label className="text-xs font-bold uppercase tracking-wider text-kumo-subtle block px-0.5">
+						Server Endpoint URL
 					</label>
 					<div className="relative group">
-						<div className="absolute right-1.5 top-1/2 -translate-y-1/2">
+						<div className="absolute right-2 top-1/2 -translate-y-1/2 z-10">
 							<CopyButton text={mcpUrl} />
 						</div>
-						<div className="bg-kumo-recessed text-kumo-default font-mono text-[11px] px-3 py-2.5 pr-10 rounded-lg border border-kumo-line break-all leading-relaxed">
+						<div className="bg-kumo-recessed text-kumo-strong font-mono text-[11px] px-3.5 py-3.5 pr-12 rounded-xl border border-kumo-line/50 break-all leading-relaxed shadow-3xs hover:border-kumo-brand/40 transition-colors">
 							{mcpUrl}
 						</div>
 					</div>
 				</div>
 
 				{/* Available tools */}
-				<div className="space-y-2">
-					<h4 className="text-xs uppercase tracking-wider font-semibold text-kumo-subtle px-0.5">
+				<div className="space-y-2.5">
+					<h4 className="text-xs uppercase tracking-wider font-bold text-kumo-subtle px-0.5">
 						Available Tools
 					</h4>
-					<div className="border border-kumo-line rounded-lg divide-y divide-kumo-line">
+					<div className="border border-kumo-line/50 rounded-xl divide-y divide-kumo-line/40 bg-kumo-base/10 overflow-hidden shadow-3xs">
 						{TOOLS.map((tool) => (
 							<div
 								key={tool.name}
-								className="flex items-center gap-2.5 px-3 py-2"
+								className="flex items-center gap-3 px-4 py-3 hover:bg-kumo-tint/40 transition-all duration-150 group"
 							>
 								<WrenchIcon
-									size={12}
+									size={14}
 									weight="bold"
-									className="text-kumo-brand shrink-0"
+									className="text-kumo-brand shrink-0 group-hover:scale-110 transition-transform"
 								/>
 								<div className="min-w-0 flex-1">
-									<span className="text-xs font-mono font-medium text-kumo-default">
+									<span className="text-xs font-mono font-bold text-kumo-strong">
 										{tool.name}
 									</span>
 								</div>
-								<span className="text-[11px] text-kumo-subtle shrink-0">
+								<span className="text-[11px] font-medium text-kumo-subtle shrink-0">
 									{tool.desc}
 								</span>
 							</div>

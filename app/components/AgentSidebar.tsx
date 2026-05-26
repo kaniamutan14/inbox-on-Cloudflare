@@ -46,40 +46,40 @@ export default function AgentSidebar() {
 	const [activeTab, setActiveTab] = useState<"agent" | "mcp">("agent");
 
 	return (
-		<div className="flex flex-col h-full">
+		<div className="flex flex-col h-full bg-kumo-surface animate-slide-right">
 			{/* Tab bar */}
-			<div className="flex items-center border-b border-kumo-line shrink-0">
+			<div className="flex items-center px-2 py-1 bg-kumo-base/40 border-b border-kumo-line/60 shrink-0 shadow-2xs">
 				<button
 					type="button"
 					onClick={() => setActiveTab("agent")}
-					className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors border-b-2 bg-transparent cursor-pointer ${
+					className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-all border-b-2 bg-transparent cursor-pointer relative ${
 						activeTab === "agent"
-							? "border-kumo-brand text-kumo-default"
-							: "border-transparent text-kumo-subtle hover:text-kumo-default"
+							? "border-kumo-brand text-kumo-brand"
+							: "border-transparent text-kumo-subtle hover:text-kumo-strong"
 					}`}
 				>
-					<RobotIcon size={14} weight={activeTab === "agent" ? "fill" : "regular"} />
-					Agent
+					<RobotIcon size={16} weight={activeTab === "agent" ? "fill" : "regular"} />
+					<span>AI Agent</span>
 				</button>
 				<button
 					type="button"
 					onClick={() => setActiveTab("mcp")}
-					className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors border-b-2 bg-transparent cursor-pointer ${
+					className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-all border-b-2 bg-transparent cursor-pointer relative ${
 						activeTab === "mcp"
-							? "border-kumo-brand text-kumo-default"
-							: "border-transparent text-kumo-subtle hover:text-kumo-default"
+							? "border-kumo-brand text-kumo-brand"
+							: "border-transparent text-kumo-subtle hover:text-kumo-strong"
 					}`}
 				>
-					<PlugsIcon size={14} weight={activeTab === "mcp" ? "fill" : "regular"} />
-					MCP
+					<PlugsIcon size={16} weight={activeTab === "mcp" ? "fill" : "regular"} />
+					<span>MCP Link</span>
 				</button>
 				<button
 					type="button"
 					onClick={closeAgentPanel}
-					className="ml-auto px-4 py-2.5 text-kumo-subtle hover:text-kumo-default xl:hidden cursor-pointer"
+					className="ml-auto p-2 rounded-full text-kumo-subtle hover:text-kumo-strong hover:bg-kumo-tint/60 xl:hidden cursor-pointer mr-2 transition-all"
 					aria-label="Close panel"
 				>
-					<XIcon size={20} />
+					<XIcon size={18} weight="bold" />
 				</button>
 			</div>
 

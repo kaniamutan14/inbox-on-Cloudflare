@@ -14,13 +14,17 @@ export default function EmailPanelHeader({
 	showThreadCount,
 }: EmailPanelHeaderProps) {
 	return (
-		<div className="px-4 py-3 border-b border-kumo-line shrink-0 md:px-6">
-			<h2 className="text-base font-semibold text-kumo-default">{subject}</h2>
-			{showThreadCount && (
-				<span className="text-xs text-kumo-subtle mt-0.5 block">
-					{messageCount} messages in this thread
-				</span>
-			)}
+		<div className="px-5 py-4 border-b border-kumo-line/60 shrink-0 md:px-6 bg-kumo-base/30">
+			<div className="flex items-start justify-between gap-3">
+				<h2 className="text-base md:text-lg font-bold text-kumo-strong tracking-tight leading-tight flex-1">
+					{subject}
+				</h2>
+				{showThreadCount && (
+					<span className="shrink-0 text-xs font-semibold text-kumo-brand bg-kumo-brand/10 dark:bg-kumo-brand/20 px-2 py-0.5 rounded-full">
+						{messageCount} messages
+					</span>
+				)}
+			</div>
 		</div>
 	);
 }

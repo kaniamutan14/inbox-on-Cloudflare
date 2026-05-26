@@ -175,46 +175,60 @@ export default function HomeRoute() {
 						<Loader size="lg" />
 					</div>
 				) : accounts.length > 0 ? (
-					<div className="rounded-xl border border-kumo-line bg-kumo-base overflow-hidden">
-						{accounts.map((account, idx) => (
-							<RouterLink
-								key={account.id}
-								to={`/mailbox/${account.id}`}
-								className={`group flex items-center gap-4 px-5 py-4 no-underline transition-colors hover:bg-kumo-tint ${
-									idx > 0 ? "border-t border-kumo-line" : ""
-								}`}
-							>
-								<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-kumo-fill text-sm font-bold text-kumo-default">
-									{account.name.charAt(0).toUpperCase()}
-								</div>
-								<div className="min-w-0 flex-1">
-									<div className="text-sm font-medium text-kumo-default truncate">
-										{account.name}
+					<div className="rounded-2xl border border-kumo-line/50 bg-kumo-base overflow-hidden shadow-xs animate-fade-in">
+						{accounts.map((account, idx) => {
+							const namePart = account.name || account.email.split("@")[0];
+							const initials = namePart.trim().charAt(0).toUpperCase();
+							
+							// Deterministic avatar color
+							let hash = 0;
+							for (let i = 0; i < namePart.length; i++) {
+								hash = namePart.charCodeAt(i) + ((hash << 5) - hash);
+							}
+							const colorIndex = Math.abs(hash) % 8;
+							const avatarColorClass = `avatar-color-${colorIndex}`;
+
+							return (
+								<RouterLink
+									key={account.id}
+									to={`/mailbox/${account.id}`}
+									className={`group flex items-center gap-4.5 px-6 py-4.5 no-underline transition-all hover:bg-kumo-tint/40 ${
+										idx > 0 ? "border-t border-kumo-line/50" : ""
+									}`}
+								>
+									<div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-base font-bold text-white shadow-sm transition-transform group-hover:scale-105 ${avatarColorClass}`}>
+										{initials}
 									</div>
-									<div className="text-sm text-kumo-subtle">
-										{account.email}
+									<div className="min-w-0 flex-1">
+										<div className="text-sm font-bold text-kumo-strong truncate group-hover:text-kumo-brand transition-colors">
+											{account.name}
+										</div>
+										<div className="text-xs text-kumo-subtle font-medium mt-0.5">
+											{account.email}
+										</div>
 									</div>
-								</div>
-								{!isConfigured && (
-									<Button
-										variant="ghost"
-										size="sm"
-										shape="square"
-										icon={<TrashIcon size={16} />}
-										aria-label={`Delete mailbox ${account.email}`}
-										onClick={(e) => {
-											e.preventDefault();
-											e.stopPropagation();
-											setMailboxToDelete({
-												id: account.id,
-												email: account.email,
-											});
-											setIsDeleteOpen(true);
-										}}
-									/>
-								)}
-							</RouterLink>
-						))}
+									{!isConfigured && (
+										<Button
+											variant="ghost"
+											size="sm"
+											shape="square"
+											icon={<TrashIcon size={16} />}
+											aria-label={`Delete mailbox ${account.email}`}
+											className="opacity-0 group-hover:opacity-100 focus:opacity-100 hover:bg-red-500/10 hover:text-red-500 transition-all rounded-lg shrink-0"
+											onClick={(e) => {
+												e.preventDefault();
+												e.stopPropagation();
+												setMailboxToDelete({
+													id: account.id,
+													email: account.email,
+												});
+												setIsDeleteOpen(true);
+											}}
+										/>
+									)}
+								</RouterLink>
+							);
+						})}
 					</div>
 				) : (
 					<div className="rounded-xl border border-kumo-line bg-kumo-base py-16 px-6">
