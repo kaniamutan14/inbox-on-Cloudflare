@@ -61,7 +61,6 @@ export default function EmailIframe({ body, autoSize }: EmailIframeProps) {
 
 		const cleanBody = DOMPurify.sanitize(body, {
 			USE_PROFILES: { html: true },
-			FORBID_TAGS: ["style"],
 			ADD_ATTR: ["target"],
 			FORCE_BODY: true,
 		});
@@ -78,9 +77,13 @@ export default function EmailIframe({ body, autoSize }: EmailIframeProps) {
 					if (h > 0) parent.postMessage({ __emailIframeHeight: true, height: h }, "*");
 				}
 				reportHeight();
-				setTimeout(reportHeight, 50);
-				setTimeout(reportHeight, 150);
-				setTimeout(reportHeight, 400);
+				if (window.ResizeObserver) {
+					new ResizeObserver(reportHeight).observe(document.body);
+				} else {
+					setTimeout(reportHeight, 50);
+					setTimeout(reportHeight, 150);
+					setTimeout(reportHeight, 400);
+				}
 			<\/script>`
 			: "";
 

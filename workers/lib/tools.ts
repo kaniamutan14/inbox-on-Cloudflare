@@ -139,7 +139,7 @@ export async function toolDraftReply(
 	let processedBody = params.body.trim();
 	if (params.runVerifyDraft) {
 		const sanitized = await verifyDraft(env.AI, processedBody);
-		if (!sanitized) {
+		if (typeof sanitized !== "string") {
 			return { error: "Draft verification failed — body could not be verified. Please try again." };
 		}
 		processedBody = sanitized;
@@ -220,7 +220,7 @@ export async function toolDraftEmail(
 	let processedBody = params.body.trim();
 	if (params.runVerifyDraft) {
 		const sanitized = await verifyDraft(env.AI, processedBody);
-		if (!sanitized) {
+		if (typeof sanitized !== "string") {
 			return { error: "Draft verification failed — body could not be verified. Please try again." };
 		}
 		processedBody = sanitized;
@@ -298,7 +298,7 @@ export async function toolUpdateDraft(
 	const rawBody = params.bodyHtml ?? oldDraft.body ?? "";
 	const verifiedBody = await verifyDraft(env.AI, rawBody);
 
-	if (!verifiedBody) {
+	if (typeof verifiedBody !== "string") {
 		return { error: "Draft verification failed — keeping existing draft unchanged. Please try again." };
 	}
 
@@ -432,7 +432,7 @@ export async function toolSendReply(
 
 	// Verify and append quoted original message
 	const sanitizedBody = await verifyDraft(env.AI, params.bodyHtml);
-	if (!sanitizedBody) {
+	if (typeof sanitizedBody !== "string") {
 		return { error: "Draft verification failed — refusing to send unverified content. Please try again." };
 	}
 	const quotedBlock = buildQuotedReplyBlock({
@@ -510,7 +510,7 @@ export async function toolSendEmail(
 	const { messageId, outgoingMessageId } = generateMessageId(fromDomain);
 
 	const sanitizedBody = await verifyDraft(env.AI, params.bodyHtml);
-	if (!sanitizedBody) {
+	if (typeof sanitizedBody !== "string") {
 		return { error: "Draft verification failed — refusing to send unverified content. Please try again." };
 	}
 

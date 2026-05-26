@@ -122,7 +122,7 @@ export async function verifyDraft(ai: Ai, body: string): Promise<string> {
 	if (!body || !body.trim()) return body;
 
 	// Separate the quoted reply block so the AI only reviews the user's text
-	const isHtml = /<[a-z][\s\S]*>/i.test(body);
+	const isHtml = /<[a-z]+(\s+[^>]*)?>/i.test(body);
 	const { reply: replyHtml, quoted: quotedBlock } = isHtml
 		? splitQuotedBlock(body)
 		: { reply: body, quoted: "" };

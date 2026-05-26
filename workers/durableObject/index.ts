@@ -949,4 +949,23 @@ export class MailboxDO extends DurableObject<Env> {
 
 		return { deletedCount: ids.length, attachmentKeys };
 	}
+
+	/**
+	 * Deletes all SQL data in the Durable Object and returns the R2 keys
+	 * for all attachments so they can be cleaned up.
+	 */
+	async deleteAllData(): Promise<string[]> {
+		const attachments = [
+			...this.ctx.storage.sql.exec(
+				`SELECT id, email_id, filename FROM attachments`
+			),
+		] as { id: string; email_id: string; filename: string }[];
+		
+		const attachmentKeys = attachments.map(
+			(a) => `attachments/${a.email_id}/${a.id}/${a.filename}`,
+		);
+
+		await this.ctx.storage.deleteAll();
+		return attachmentKeys;
+	}
 }
