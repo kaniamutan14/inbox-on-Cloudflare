@@ -137,7 +137,13 @@ app.delete("/api/v1/mailboxes/:mailboxId", async (c) => {
 	const mailboxId = c.req.param("mailboxId")!;
 	const key = `mailboxes/${mailboxId}.json`;
 	if (!(await c.env.BUCKET.head(key))) return c.json({ error: "Not found" }, 404);
-	await c.env.BUCKET.delete(key); // TODO: also delete DO data and R2 attachment blobs
+	
+	// Delete DO data and R2 attachment blobs
+	const stub = c.env.MAILBOX.get(c.env.MAILBOX.idFromName(mailboxId));
+	const attachmentKeys = await (stub as any).deleteAllData();
+	await Promise.all(attachmentKeys.map((k: string) => c.env.BUCKET.delete(k)));
+
+	await c.env.BUCKET.delete(key);
 	return c.body(null, 204);
 });
 
