@@ -40,7 +40,9 @@ export default function MailboxRoute() {
 
 	useEffect(() => {
 		const checkScrollLock = () => {
-			if (isAgentPanelOpen && window.innerWidth < 1280) {
+			const isMobileSidebar = isSidebarOpen && window.innerWidth < 768;
+			const isMobileAgent = isAgentPanelOpen && window.innerWidth < 1280;
+			if (isMobileSidebar || isMobileAgent) {
 				document.body.style.overflow = "hidden";
 			} else {
 				document.body.style.overflow = "";
@@ -54,14 +56,14 @@ export default function MailboxRoute() {
 			window.removeEventListener("resize", checkScrollLock);
 			document.body.style.overflow = "";
 		};
-	}, [isAgentPanelOpen]);
+	}, [isAgentPanelOpen, isSidebarOpen]);
 
 	return (
 		<div className="flex h-screen overflow-hidden">
 			{/* Mobile sidebar overlay backdrop */}
 			{isSidebarOpen && (
 				<div
-					className="fixed inset-0 z-30 bg-black/30 md:hidden"
+					className="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm md:hidden transition-all duration-300 animate-fade-in"
 					onClick={closeSidebar}
 					onKeyDown={(e) => e.key === "Escape" && closeSidebar()}
 					role="button"
@@ -73,7 +75,7 @@ export default function MailboxRoute() {
 			{/* Agent panel overlay backdrop for mobile */}
 			{isAgentPanelOpen && (
 				<div
-					className="fixed inset-0 z-30 bg-black/30 xl:hidden"
+					className="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm xl:hidden transition-all duration-300 animate-fade-in"
 					onClick={closeAgentPanel}
 					onKeyDown={(e) => e.key === "Escape" && closeAgentPanel()}
 					role="button"
@@ -84,7 +86,7 @@ export default function MailboxRoute() {
 
 			{/* Sidebar: hidden on mobile by default, shown as overlay when open */}
 			<div
-				className={`fixed inset-y-0 left-0 z-40 w-64 transform transition-transform duration-200 ease-in-out md:relative md:translate-x-0 md:z-0 ${
+				className={`fixed inset-y-0 left-0 z-40 w-72 transform transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:relative md:translate-x-0 md:z-0 ${
 					isSidebarOpen ? "translate-x-0" : "-translate-x-full"
 				}`}
 			>
@@ -101,7 +103,7 @@ export default function MailboxRoute() {
 
 			{/* Agent + MCP sidebar -- persistent on desktop, drawer on mobile */}
 			<div
-				className={`fixed inset-y-0 right-0 z-40 w-[90%] max-w-[380px] transform transition-transform duration-200 ease-in-out border-l border-kumo-line bg-kumo-base flex flex-col overflow-hidden xl:relative xl:translate-x-0 xl:z-0 xl:w-[380px] ${
+				className={`fixed inset-y-0 right-0 z-40 w-[90%] max-w-[380px] transform transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] border-l border-kumo-line bg-kumo-base flex flex-col overflow-hidden xl:relative xl:translate-x-0 xl:z-0 xl:w-[380px] ${
 					isAgentPanelOpen ? "translate-x-0" : "translate-x-full xl:hidden"
 				}`}
 			>

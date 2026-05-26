@@ -91,7 +91,10 @@ export default function EmailIframe({ body, autoSize }: EmailIframeProps) {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data: cid: https:; script-src 'unsafe-inline';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data: cid: https:; script-src 'unsafe-inline';">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; }
 html {
@@ -99,10 +102,10 @@ html {
 	color-scheme: light;
 }
 body {
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 	font-size: 14px;
 	line-height: 1.6;
-	color: #1a1a1a;
+	color: #1f2937;
 	background: #ffffff;
 	padding: ${padding};
 	margin: 0;
@@ -113,25 +116,30 @@ body {
 [style*="position: fixed"], [style*="position:fixed"], [style*="position: absolute"], [style*="position:absolute"] {
 	position: relative !important;
 }
-a { color: #2563eb; }
-img { max-width: 100%; height: auto; }
+a { color: #1a73e8; text-decoration: none; }
+a:hover { text-decoration: underline; }
+img { max-width: 100%; height: auto; border-radius: 8px; }
 blockquote {
-	border-left: 3px solid #d1d5db;
-	padding-left: 1em;
+	border-left: 3px solid #1a73e8;
+	background-color: #f8fafd;
+	padding: 8px 12px;
 	margin-left: 0;
-	color: #6b7280;
+	margin-right: 0;
+	color: #4b5563;
+	border-radius: 0 8px 8px 0;
 }
 pre {
 	background: #f3f4f6;
 	padding: 12px;
-	border-radius: 6px;
+	border-radius: 8px;
 	overflow-x: auto;
 	font-size: 13px;
+	border: 1px solid #e5e7eb;
 }
 table { border-collapse: collapse; max-width: 100%; }
 td, th { padding: 4px 8px; }
 p { margin: 4px 0; }
-h1, h2, h3 { margin: 8px 0 4px; }
+h1, h2, h3 { margin: 8px 0 4px; color: #111827; }
 ul, ol { padding-left: 20px; margin: 4px 0; }
 </style>
 </head>
