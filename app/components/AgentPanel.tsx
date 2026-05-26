@@ -91,7 +91,7 @@ function ToolCallBadge({
 					className="text-emerald-500 ml-auto shrink-0"
 				/>
 			) : (
-				<Loader size="xs" className="ml-auto shrink-0" />
+				<Loader size="sm" className="ml-auto shrink-0" />
 			)}
 		</div>
 	);
@@ -104,7 +104,7 @@ function getToolNameFromPart(part: UIMessage["parts"][number]): string | null {
 }
 
 function hasDraftReplyTool(message: UIMessage): boolean {
-	return message.parts.some((part) => {
+	return (message.parts || []).some((part) => {
 		const toolName = getToolNameFromPart(part);
 		return toolName === "draft_reply";
 	});
@@ -166,9 +166,9 @@ function MessageBubble({
 					isUser ? "items-end" : "items-start"
 				}`}
 			>
-				{message.parts.map((part, i) => {
+				{(message.parts || []).map((part, i) => {
 					const key = `${message.id}-part-${i}`;
-					if (part.type === "text" && part.text.trim()) {
+					if (part.type === "text" && part.text?.trim()) {
 						return (
 							<div
 								key={key}
@@ -338,12 +338,19 @@ function AgentChatConnected({
 		}
 	}, [isAgentPanelOpen]);
 
+	useEffect(() => {
+		if (inputRef.current) {
+			inputRef.current.style.height = "auto";
+			inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 100)}px`;
+			inputRef.current.style.overflow = inputRef.current.scrollHeight > 100 ? "auto" : "hidden";
+		}
+	}, [inputValue]);
+
 	const handleSend = () => {
 		const text = inputValue.trim();
 		if (!text || isStreaming) return;
 		setInputValue("");
 		sendMessage({ text });
-		if (inputRef.current) inputRef.current.style.height = "auto";
 	};
 
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -370,7 +377,7 @@ function AgentChatConnected({
 					</span>
 				</div>
 				<div className="flex items-center gap-1.5">
-					{isStreaming && <Loader size="xs" />}
+					{isStreaming && <Loader size="sm" />}
 					{messages.length > 0 && (
 						<Tooltip content="Clear chat" asChild>
 							<Button
@@ -436,18 +443,24 @@ function AgentChatConnected({
 											body?: string;
 											id?: string;
 										} | null = null;
-										for (const part of msg.parts) {
+										for (const part of msg.parts || []) {
 											if (
 												(part as any).toolName === "draft_reply" &&
-												(part as any).result
+												(part as any).result &&
+												typeof (part as any).result === "object" &&
+												!(part as any).result.error
 											) {
-												draftData = (part as any).result;
+												draftData = (part as any).result.draft || (part as any).result;
+												// Safety override: if it has draftId but no id, map it.
+												if (!draftData!.id && (part as any).result.draftId) {
+													draftData!.id = (part as any).result.draftId;
+												}
 												break;
 											}
 										}
-										if (draftData) {
+										if (draftData && draftData.id) {
 											const draftEmail = {
-												id: draftData.id || "",
+												id: draftData.id,
 												subject: draftData.subject || "",
 												sender: mailboxId,
 												recipient: draftData.to || "",
@@ -476,7 +489,7 @@ function AgentChatConnected({
 									<RobotIcon size={13} weight="bold" />
 								</div>
 								<div className="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl bg-kumo-base text-kumo-strong border border-kumo-line/50 rounded-bl-none shadow-3xs">
-									<Loader size="xs" />
+									<Loader size="sm" />
 									<span className="text-[11px] font-semibold text-kumo-subtle">
 										Thinking...
 									</span>
@@ -515,13 +528,6 @@ function AgentChatConnected({
 							aria-label="Chat message input"
 							className="flex-1 resize-none bg-transparent border-none outline-none focus:outline-none p-0 text-xs md:text-sm text-kumo-strong placeholder:text-kumo-subtle focus:ring-0 min-h-[28px] max-h-[100px] leading-relaxed"
 							style={{ height: "auto", overflow: "hidden" }}
-							onInput={(e) => {
-								const t = e.target as HTMLTextAreaElement;
-								t.style.height = "auto";
-								t.style.height = `${Math.min(t.scrollHeight, 100)}px`;
-								t.style.overflow =
-									t.scrollHeight > 100 ? "auto" : "hidden";
-							}}
 						/>
 						<Button
 							variant="primary"

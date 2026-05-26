@@ -280,6 +280,12 @@ export class EmailAgent extends AIChatAgent<any> {
 		const tools = createEmailTools(env, mailboxId);
 		const systemPrompt = await getSystemPrompt(env, mailboxId);
 
+		// NEW: Truncate persistent history to prevent infinite token growth crash
+		if (this.messages.length > 30) {
+			this.messages = this.messages.slice(-30);
+			await this.persistMessages(this.messages);
+		}
+
 		const result = streamText({
 			model: workersai("@cf/moonshotai/kimi-k2.6"),
 			system: systemPrompt,
@@ -434,6 +440,39 @@ Email details:
 
 Email body:
 ${emailBody || "(could not pre-read — use get_email to read it)"}`;
+
+		// NEW: Sender Context RAG
+		let ragContext = "";
+		try {
+			const recentEmailsRaw = (await (stub as any).searchEmails({
+				query: emailData.sender,
+				limit: 5,
+			})) as { id: string; thread_id: string; date: string }[];
+
+			const crossThreadEmails = recentEmailsRaw
+				.filter(e => e.thread_id !== emailData.threadId)
+				.slice(0, 3);
+			
+			if (crossThreadEmails.length > 0) {
+				const fullEmails = await Promise.all(
+					crossThreadEmails.map(e => stub.getEmail(e.id) as Promise<EmailFull | null>)
+				);
+				ragContext = fullEmails
+					.filter((e): e is EmailFull => e !== null)
+					.map(e => {
+						const text = e.body ? stripHtmlToText(e.body) : "";
+						const safeText = text.substring(0, 250).replace(/\n+/g, " ").trim();
+						return `- [${new Date(e.date).toLocaleDateString()}] "${e.subject}": "${safeText}${text.length > 250 ? '...' : ''}"`;
+					})
+					.join("\n");
+			}
+		} catch (e) {
+			console.warn("RAG retrieval failed:", (e as Error).message);
+		}
+
+		if (ragContext) {
+			autoPrompt += `\n\nRecent interactions with this sender (for context):\n${ragContext}`;
+		}
 
 		if (threadContext) {
 			autoPrompt += `

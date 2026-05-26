@@ -77,7 +77,20 @@ export default function EmailPanel({ emailId }: { emailId: string }) {
 	// Reset expanded state only when the selected email changes, not on every refetch.
 	// Using allMessages as a dependency would reset user expand/collapse state on background refetches.
 	const currentEmailId = email?.id;
-	useEffect(() => { if (allMessages.length > 1) setExpandedMessages(new Set([allMessages[0].id])); }, [currentEmailId]); // eslint-disable-line react-hooks/exhaustive-deps
+	const allMessagesLength = allMessages.length;
+	const firstMessageId = allMessages.length > 0 ? allMessages[0].id : null;
+	useEffect(() => {
+		setExpandedMessages((prev) => {
+			if (currentEmailId && !prev.has(currentEmailId)) {
+				return new Set(firstMessageId ? [firstMessageId] : []);
+			}
+			const next = new Set(prev);
+			if (firstMessageId) {
+				next.add(firstMessageId);
+			}
+			return next;
+		});
+	}, [currentEmailId, allMessagesLength, firstMessageId]);
 
 	const toggleExpand = (msgId: string) => { setExpandedMessages((prev) => { const next = new Set(prev); if (next.has(msgId)) next.delete(msgId); else next.add(msgId); return next; }); };
 
@@ -170,6 +183,7 @@ export default function EmailPanel({ emailId }: { emailId: string }) {
 	};
 
 	const hasThread = allMessages.length > 1;
+	const isActionPending = deleteEmailMut.isPending || moveEmailMut.isPending;
 
 	return (
 		<div className="flex flex-col h-full">
@@ -179,6 +193,7 @@ export default function EmailPanel({ emailId }: { emailId: string }) {
 				isDraftFolder={isDraftFolder}
 				isTrashFolder={isTrashFolder}
 				isSending={isSending}
+				isActionPending={isActionPending}
 				moveToFolders={moveToFolders}
 				onBack={closePanel}
 				onSendDraft={() => handleSendDraft()}

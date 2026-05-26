@@ -28,6 +28,7 @@ interface EmailPanelToolbarProps {
 	isDraftFolder: boolean;
 	isTrashFolder?: boolean;
 	isSending: boolean;
+	isActionPending?: boolean;
 	moveToFolders: Folder[];
 	lastReceivedMessage?: Email;
 	onBack: () => void;
@@ -50,6 +51,7 @@ export default function EmailPanelToolbar({
 	isDraftFolder,
 	isTrashFolder,
 	isSending,
+	isActionPending,
 	moveToFolders,
 	onBack,
 	onSendDraft,
@@ -181,7 +183,7 @@ export default function EmailPanelToolbar({
 				/>
 			</Tooltip>
 
-			<MoveToFolderMenu folders={moveToFolders} onMove={onMove} />
+			<MoveToFolderMenu folders={moveToFolders} onMove={onMove} disabled={isActionPending} />
 
 			<div className="ml-auto flex items-center gap-0.5">
 				<Tooltip content="View source" side="bottom" asChild>
@@ -200,6 +202,7 @@ export default function EmailPanelToolbar({
 						variant="ghost"
 						shape="square"
 						size="sm"
+						disabled={isActionPending}
 						icon={<TrashIcon size={18} />}
 						onClick={onDelete}
 						aria-label={isTrashFolder ? "Delete Permanently" : "Move to Trash"}
@@ -222,7 +225,7 @@ export default function EmailPanelToolbar({
 	);
 }
 
-function MoveToFolderMenu({ folders, onMove }: { folders: Folder[]; onMove: (id: string) => void }) {
+function MoveToFolderMenu({ folders, onMove, disabled }: { folders: Folder[]; onMove: (id: string) => void; disabled?: boolean }) {
 	const [open, setOpen] = useState(false);
 	const ref = useRef<HTMLDivElement>(null);
 
@@ -242,6 +245,7 @@ function MoveToFolderMenu({ folders, onMove }: { folders: Folder[]; onMove: (id:
 					variant="ghost"
 					shape="square"
 					size="sm"
+					disabled={disabled}
 					icon={<FolderSimpleIcon size={18} />}
 					onClick={() => setOpen((o) => !o)}
 					aria-label="Move to folder"
