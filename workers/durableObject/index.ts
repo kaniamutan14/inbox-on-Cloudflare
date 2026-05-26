@@ -536,12 +536,21 @@ export class MailboxDO extends DurableObject<Env> {
 
 	async deleteEmail(id: string) {
 		const email = this.db
-			.select({ id: schema.emails.id })
+			.select({ id: schema.emails.id, folder_id: schema.emails.folder_id })
 			.from(schema.emails)
 			.where(eq(schema.emails.id, id))
 			.get();
 
 		if (!email) return null;
+
+		if (email.folder_id !== Folders.TRASH) {
+			this.db
+				.update(schema.emails)
+				.set({ folder_id: Folders.TRASH, trashed_at: new Date().toISOString() })
+				.where(eq(schema.emails.id, id))
+				.run();
+			return { softDeleted: true };
+		}
 
 		const emailAttachments = this.db
 			.select({
@@ -871,16 +880,41 @@ export class MailboxDO extends DurableObject<Env> {
 	}
 
 	/**
-	 * Delete inbox emails older than 30 days.
-	 * Only targets the "inbox" folder — Sent, Draft, Archive, Trash,
-	 * and all custom folders are exempt.
-	 * Returns IDs of deleted emails + their attachment R2 keys for cleanup.
+	 * Move inbox emails older than 30 days to the Trash folder.
+	 * Only targets the "inbox" folder.
 	 */
-	async purgeOldInboxEmails(): Promise<{ deletedCount: number; attachmentKeys: string[] }> {
+	async purgeOldInboxEmails(): Promise<{ movedCount: number }> {
 		const oldEmails = [
 			...this.ctx.storage.sql.exec(
 				`SELECT id FROM emails WHERE folder_id = ?1 AND date < datetime('now', '-30 days')`,
 				Folders.INBOX,
+			),
+		] as { id: string }[];
+
+		if (oldEmails.length === 0) return { movedCount: 0 };
+
+		const ids = oldEmails.map((e) => e.id);
+		const placeholders = ids.map((_, i) => `?${i + 1}`).join(",");
+
+		// Move to trash
+		this.ctx.storage.sql.exec(
+			`UPDATE emails SET folder_id = ?1, trashed_at = datetime('now') WHERE id IN (${placeholders})`,
+			Folders.TRASH,
+			...ids,
+		);
+
+		return { movedCount: ids.length };
+	}
+
+	/**
+	 * Permanently delete trash emails that have been in the trash for > 30 days.
+	 * Returns IDs of deleted emails + their attachment R2 keys for cleanup.
+	 */
+	async purgeOldTrashEmails(): Promise<{ deletedCount: number; attachmentKeys: string[] }> {
+		const oldEmails = [
+			...this.ctx.storage.sql.exec(
+				`SELECT id FROM emails WHERE folder_id = ?1 AND trashed_at < datetime('now', '-30 days')`,
+				Folders.TRASH,
 			),
 		] as { id: string }[];
 

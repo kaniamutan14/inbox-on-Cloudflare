@@ -163,13 +163,27 @@ app.get("/api/v1/mailboxes/:mailboxId/emails", async (c: AppContext) => {
 	if (folder === Folders.INBOX) {
 		c.executionCtx.waitUntil((async () => {
 			try {
-				const { deletedCount, attachmentKeys } = await (stub as any).purgeOldInboxEmails();
-				if (deletedCount > 0) {
-					console.log(`Purged ${deletedCount} inbox emails older than 30 days`);
-					await Promise.all(attachmentKeys.map((key: string) => c.env.BUCKET.delete(key)));
+				const { movedCount } = await (stub as any).purgeOldInboxEmails();
+				if (movedCount > 0) {
+					console.log(`Moved ${movedCount} inbox emails older than 30 days to trash`);
 				}
 			} catch (e) {
 				console.error("Inbox purge failed:", (e as Error).message);
+			}
+		})());
+	}
+
+	// Lazy 30-day trash cleanup (runs in background, no latency impact)
+	if (folder === Folders.TRASH) {
+		c.executionCtx.waitUntil((async () => {
+			try {
+				const { deletedCount, attachmentKeys } = await (stub as any).purgeOldTrashEmails();
+				if (deletedCount > 0) {
+					console.log(`Purged ${deletedCount} trash emails older than 30 days`);
+					await Promise.all(attachmentKeys.map((key: string) => c.env.BUCKET.delete(key)));
+				}
+			} catch (e) {
+				console.error("Trash purge failed:", (e as Error).message);
 			}
 		})());
 	}
@@ -265,8 +279,14 @@ app.put("/api/v1/mailboxes/:mailboxId/emails/:id", async (c: AppContext) => {
 
 app.delete("/api/v1/mailboxes/:mailboxId/emails/:id", async (c: AppContext) => {
 	const id = c.req.param("id")!;
-	const attachments = await c.var.mailboxStub.deleteEmail(id);
-	if (attachments === null) return c.json({ error: "Not found" }, 404);
+	const result = await c.var.mailboxStub.deleteEmail(id);
+	if (result === null) return c.json({ error: "Not found" }, 404);
+	if (!Array.isArray(result)) {
+		// Soft deleted
+		return c.body(null, 204);
+	}
+	// Hard deleted
+	const attachments = result;
 	if (attachments.length > 0) await c.env.BUCKET.delete(attachments.map((att: any) => `attachments/${id}/${att.id}/${att.filename}`));
 	return c.body(null, 204);
 });

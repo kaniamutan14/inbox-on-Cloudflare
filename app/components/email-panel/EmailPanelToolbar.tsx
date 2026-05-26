@@ -26,6 +26,7 @@ interface EmailPanelToolbarProps {
 	email: Email;
 	mailboxId?: string;
 	isDraftFolder: boolean;
+	isTrashFolder?: boolean;
 	isSending: boolean;
 	moveToFolders: Folder[];
 	lastReceivedMessage?: Email;
@@ -47,6 +48,7 @@ export default function EmailPanelToolbar({
 	email,
 	mailboxId,
 	isDraftFolder,
+	isTrashFolder,
 	isSending,
 	moveToFolders,
 	onBack,
@@ -193,14 +195,14 @@ export default function EmailPanelToolbar({
 						className="hover:bg-kumo-tint/60 text-kumo-subtle transition-colors"
 					/>
 				</Tooltip>
-				<Tooltip content="Delete" side="bottom" asChild>
+				<Tooltip content={isTrashFolder ? "Delete Permanently" : "Move to Trash"} side="bottom" asChild>
 					<Button
 						variant="ghost"
 						shape="square"
 						size="sm"
 						icon={<TrashIcon size={18} />}
 						onClick={onDelete}
-						aria-label="Delete"
+						aria-label={isTrashFolder ? "Delete Permanently" : "Move to Trash"}
 						className="hover:bg-red-500/10 hover:text-red-500 text-kumo-subtle transition-colors"
 					/>
 				</Tooltip>
