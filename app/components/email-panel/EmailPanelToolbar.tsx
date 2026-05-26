@@ -259,7 +259,7 @@ function MoveToFolderMenu({ folders, onMove, disabled }: { folders: Folder[]; on
 						<button
 							key={f.id}
 							type="button"
-							className="w-full text-left px-3 py-1.5 text-sm text-kumo-default hover:bg-kumo-overlay transition-colors"
+							className="w-full text-left px-3 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-blue-600 hover:text-white transition-all duration-150"
 							onClick={() => { onMove(f.id); setOpen(false); }}
 						>
 							{f.name}
