@@ -168,4 +168,8 @@ export const mailboxMigrations: Migration[] = [
             CREATE INDEX IF NOT EXISTS idx_emails_folder_date ON emails(folder_id, date DESC);
         `,
 	},
+	{
+		name: "9_add_trashed_at_column",
+		sql: txn(`ALTER TABLE emails ADD COLUMN trashed_at TEXT;`),
+	},
 ];
