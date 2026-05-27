@@ -12,8 +12,7 @@
 	"vars": {
     // The single catch-all mailbox address. All incoming mail routes here.
     // DOMAINS and EMAIL_ADDRESSES are derived from this at runtime.
-    // SMTP2GO_API_KEY, POLICY_AUD, TEAM_DOMAIN, DEFAULT_MAILBOX, DISCORD_WEBHOOK_URL → set as Worker secrets or in Dashboard.
-    
+    // SMTP2GO_API_KEY, POLICY_AUD, TEAM_DOMAIN, DEFAULT_MAILBOX, DISCORD_WEBHOOK_URL, MCP_SERVER_NAME → set as Worker secrets or in Dashboard.
   },
 	"r2_buckets": [
 		{
