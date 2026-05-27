@@ -3,9 +3,10 @@
 //     https://opensource.org/licenses/Apache-2.0
 
 export interface Env extends Omit<Cloudflare.Env, "DEFAULT_MAILBOX"> {
-	POLICY_AUD: string;
-	TEAM_DOMAIN: string;
-	SMTP2GO_API_KEY: string;
-	DEFAULT_MAILBOX: string;
-	DISCORD_WEBHOOK_URL?: string;
+  POLICY_AUD: string;
+  TEAM_DOMAIN: string;
+  SMTP2GO_API_KEY: string;
+  DEFAULT_MAILBOX: string;
+  DISCORD_WEBHOOK_URL?: string;
+  MCP_SERVER_NAME?: string;
 }
