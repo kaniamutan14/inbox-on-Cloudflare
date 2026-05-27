@@ -1,6 +1,6 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "xyz-production",
+	"name": "inbox-xyz",
 	"compatibility_date": "2025-11-28",
 	"main": "./workers/app.ts",
 	"observability": {
@@ -18,8 +18,8 @@
 	"r2_buckets": [
 		{
 			"binding": "BUCKET",
-			"bucket_name": "agentic-inbox",
-			"preview_bucket_name": "agentic-inbox"
+			"bucket_name": "agentic-inbox-xyz",
+			"preview_bucket_name": "agentic-inbox-xyz"
 		}
 	],
 	"ai": {
