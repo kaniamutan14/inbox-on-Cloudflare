@@ -89,4 +89,4 @@ npm run deploy
 
 ## 🛠️ MCP Usage
 You can connect this inbox to external tools (like Cursor or Claude Code) by pointing them to your worker's MCP endpoint:
-`https://inbox-on-cloudflare.your-subdomain.workers.dev/mcp` or Custom domain you setup `inbox@example.com/mcp`
+`https://inbox-on-cloudflare.your-subdomain.workers.dev/mcp` or Custom domain you setup `inbox@example.com/mcp`.
