@@ -62,7 +62,11 @@ jobs:
                 --title "[Security Sync] $PR_TITLE" \
                 --body "🔒 Auto-cherry-picked security update from main.
           Original PR: #$PR_NUMBER"
-              echo "✅ PR created successfully"
+              gh pr merge "dependabot-sync/$SHORT_SHA" \
+                --merge \
+                --auto \
+                --delete-branch
+              echo "✅ PR created and auto-merged successfully"
             fi
           else
             git cherry-pick --abort
