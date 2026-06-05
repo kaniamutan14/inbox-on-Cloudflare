@@ -10,8 +10,8 @@ on:
       pr_number:
         description: 'Merged PR number (e.g. 42)'
         required: true
-      merge_sha:
-        description: 'Merge commit SHA from that PR'
+      dependabot_sha:
+        description: 'Dependabot commit SHA (NOT the merge commit)'
         required: true
 
 jobs:
@@ -37,20 +37,22 @@ jobs:
         run: |
           # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
           # ⬇️ CHANGE THIS to your other branch name ⬇️
-          TARGET_BRANCH="inbox-xyz"
+          TARGET_BRANCH="your-other-branch"
           # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             PR_TITLE="Manual sync test"
             PR_NUMBER="${{ github.event.inputs.pr_number }}"
-            MERGE_SHA="${{ github.event.inputs.merge_sha }}"
+            # Use the input SHA
+            TARGET_SHA="${{ github.event.inputs.dependabot_sha }}"
           else
             PR_TITLE="${{ github.event.pull_request.title }}"
             PR_NUMBER="${{ github.event.pull_request.number }}"
-            MERGE_SHA="${{ github.event.pull_request.merge_commit_sha }}"
+            # Grab Dependabot's specific commit (the "head" of its branch), not the merge commit
+            TARGET_SHA="${{ github.event.pull_request.head.sha }}"
           fi
 
-          SHORT_SHA="${MERGE_SHA:0:8}"
+          SHORT_SHA="${TARGET_SHA:0:8}"
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -58,7 +60,8 @@ jobs:
           git checkout "$TARGET_BRANCH"
           git checkout -b "dependabot-sync/$SHORT_SHA"
 
-          if git cherry-pick "$MERGE_SHA" --no-commit; then
+          # Now cherry-picking the clean Dependabot commit
+          if git cherry-pick "$TARGET_SHA" --no-commit; then
             git commit -m "chore(deps): sync security update - $PR_TITLE"
             git push origin "dependabot-sync/$SHORT_SHA"
             gh pr create \
@@ -77,7 +80,7 @@ jobs:
           Please cherry-pick manually:
           \`\`\`
           git checkout $TARGET_BRANCH
-          git cherry-pick $MERGE_SHA
+          git cherry-pick $TARGET_SHA
           \`\`\`"
             echo "❌ Cherry-pick failed due to conflicts"
           fi
