@@ -37,7 +37,7 @@ jobs:
         run: |
           # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
           # ⬇️ CHANGE THIS to your other branch name ⬇️
-          TARGET_BRANCH="your-other-branch"
+          TARGET_BRANCH="inbox-xyz"
           # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
