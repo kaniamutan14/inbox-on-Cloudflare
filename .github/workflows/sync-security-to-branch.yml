@@ -1,0 +1,66 @@
+name: Sync Dependabot Security PRs
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  cherry-pick-to-other-branch:
+    if: >
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.user.login == 'dependabot[bot]'
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Cherry-pick to target branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          # ⬇️ CHANGE THIS to your other branch name ⬇️
+          TARGET_BRANCH="inbox-xyz"
+          # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          MERGE_SHA="${{ github.event.pull_request.merge_commit_sha }}"
+          SHORT_SHA="${MERGE_SHA:0:8}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout "$TARGET_BRANCH"
+          git checkout -b "dependabot-sync/$SHORT_SHA"
+
+          if git cherry-pick "$MERGE_SHA" --no-commit; then
+            git commit -m "chore(deps): sync security update - $PR_TITLE"
+            git push origin "dependabot-sync/$SHORT_SHA"
+            gh pr create \
+              --base "$TARGET_BRANCH" \
+              --head "dependabot-sync/$SHORT_SHA" \
+              --title "[Security Sync] $PR_TITLE" \
+              --body "🔒 Auto-cherry-picked security update from main.
+
+          Original PR: #$PR_NUMBER"
+            echo "✅ PR created successfully"
+          else
+            git cherry-pick --abort
+            gh pr comment "$PR_NUMBER" \
+              --body "⚠️ **Auto-sync failed** — could not cherry-pick this security update to \`$TARGET_BRANCH\` due to merge conflicts.
+
+          Please cherry-pick manually:
+          \`\`\`
+          git checkout $TARGET_BRANCH
+          git cherry-pick $MERGE_SHA
+          \`\`\`"
+            echo "❌ Cherry-pick failed due to conflicts"
+          fi
