@@ -5,11 +5,21 @@ on:
     types: [closed]
     branches: [main]
 
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'Merged PR number (e.g. 42)'
+        required: true
+      merge_sha:
+        description: 'Merge commit SHA from that PR'
+        required: true
+
 jobs:
   cherry-pick-to-other-branch:
     if: >
-      github.event.pull_request.merged == true &&
-      github.event.pull_request.user.login == 'dependabot[bot]'
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.merged == true &&
+       github.event.pull_request.user.login == 'dependabot[bot]')
 
     runs-on: ubuntu-latest
     permissions:
@@ -30,9 +40,16 @@ jobs:
           TARGET_BRANCH="inbox-xyz"
           # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-          PR_TITLE="${{ github.event.pull_request.title }}"
-          PR_NUMBER="${{ github.event.pull_request.number }}"
-          MERGE_SHA="${{ github.event.pull_request.merge_commit_sha }}"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            PR_TITLE="Manual sync test"
+            PR_NUMBER="${{ github.event.inputs.pr_number }}"
+            MERGE_SHA="${{ github.event.inputs.merge_sha }}"
+          else
+            PR_TITLE="${{ github.event.pull_request.title }}"
+            PR_NUMBER="${{ github.event.pull_request.number }}"
+            MERGE_SHA="${{ github.event.pull_request.merge_commit_sha }}"
+          fi
+
           SHORT_SHA="${MERGE_SHA:0:8}"
 
           git config user.name "github-actions[bot]"
